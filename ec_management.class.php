@@ -305,7 +305,7 @@ class EC_Management {
         </tr>
         <tr>
           <th scope="row"><label for="startDate"><?php _e('Start Date (YYYY-MM-DD, if blank will be today)','events-calendar'); ?></label></th>
-          <td><input class="ec-edit-form-date" autocomplete="OFF" type="text" name="EC_startDate" id="EC_startDate" /></td>
+          <td><input class="ec-edit-form-date with_date_picker" autocomplete="OFF" type="text" name="EC_startDate" id="EC_startDate" /></td>
         </tr>
         <tr>
           <th scope="row"><label for="startTime"><?php _e('Start Time (HH:MM, can be blank)','events-calendar'); ?></label></th>
@@ -313,7 +313,7 @@ class EC_Management {
         </tr>
         <tr>
           <th scope="row"><label for="endDate"><?php _e('End Date (YYYY-MM-DD, if blank will be same as start date)','events-calendar'); ?></label></th>
-          <td><input class="ec-edit-form-date" autocomplete="OFF" type="text" name="EC_endDate" id="EC_endDate" /></td>
+          <td><input class="ec-edit-form-date with_date_picker" autocomplete="OFF" type="text" name="EC_endDate" id="EC_endDate" /></td>
         </tr>
         <tr>
           <th scope="row"><label for="endTime"><?php _e('End Time (HH:MM, can be blank)','events-calendar'); ?></label></th>
