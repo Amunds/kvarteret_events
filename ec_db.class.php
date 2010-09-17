@@ -81,6 +81,10 @@ class EC_DB {
 	 */
 	var $postsTable;
 
+        var $categoryTable;
+
+        var $locationTable;
+
 	/**
 	 * Holds the main WPEC table version.
 	 * @var int
@@ -104,6 +108,8 @@ class EC_DB {
 			$this->mainTable = $this->mainTableCaps;
 
 		$this->postsTable = $this->db->prefix . 'posts';
+		$this->categoryTable = $this->db->prefix . 'eventscalendar_categories';
+		$this->locationTable = $this->db->prefix . 'eventscalendar_location';
 	}
 
 	/**
