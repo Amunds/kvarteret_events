@@ -375,6 +375,177 @@ class EC_DB {
 	}
 
 	/**
+	 * CATEGORY FUNCTIONS
+	 */
+
+	/**
+	 * Creates a specific category, must not exist before
+	 *
+	 * @param int $id
+	 */
+	function addCategory($name) {
+		$sql = "INSERT INTO `$this->categoryTable` "
+		     . "(name) "
+		     . "VALUES (%s);";
+		return $this->db->query($this->db->prepare($sql, $name));
+	}
+
+	/**
+	 * Edit a specific category.
+	 * $newName must not exist on beforehand.
+	 *
+	 * @param int $id
+	 * @param string $newName
+	 * @return bool or number of rows acted upon
+	 */
+	function editCategory($id, $newName) {
+		$newName = trim($newName);
+		if (strlen($newName) == 0) {
+			return False;
+		}
+
+		$sql = "SELECT COUNT(*) FROM `$this->categoryTable` "
+		     . "WHERE name = %s";
+		$count = $this->db->get_var($this->db->prepare($sql, $newName, $id));
+
+		if ($count == 0) {
+			$sql = "UPDATE`$this->categoryTable` "
+			     . "SET name = %s "
+			     . "WHERE id = %d;";
+
+			return $this->db->query($this->db->prepare($sql, $newName, $id));
+		} else {
+			return False;
+		}
+	}
+
+	/**
+	 * Returns a specific category
+	 *
+	 * @param int $id
+	 * @return string
+	 */
+	function getCategory($id) {
+		$sql = "SELECT name FROM `$this->categoryTable` WHERE id = " . intval($id);
+		return $this->db->get_results($sql);
+	}
+
+	/**
+	 * Returns a list of all categories
+	 *
+	 * @return array
+	 */
+	function getCategoryList () {
+		$sql = "SELECT * FROM `$this->categoryTable`;";
+		return $this->db->get_results($sql);
+	}
+
+	/**
+	 * Deletes a specific category. 
+	 * Will check if any posts refer to before deletion.
+	 *
+	 * @param int $id
+	 * @return bool or number of rows acted upon
+	 */
+	function deleteCategory($id) {
+		$sql = "SELECT COUNT(*) FROM `$this->mainTable` WHERE locationId = " . intval($id);
+		$count = $this->db->get_var($sql);
+
+		if ($count == 0) {
+			$sql = "DELETE FROM `$this->categoryTable` WHERE id = " . intval($id);
+			return $this->db->query($sql);
+		} else {
+			return False;
+		}
+	}
+
+	/**
+	 * LOCATION FUNCTIONS
+	 */
+
+	/**
+	 * Creates a specific location, must not exist before
+	 *
+	 * @param int $id
+	 * @return int number of rows acted upon
+	 */
+	function addLocation($name, $description = null) {
+		$sql = "INSERT INTO `$this->locationTable` "
+		     . "(name, description) "
+		     . "VALUES (%s, %s);";
+		return $this->db->query($this->db->prepare($sql, $name, $description));
+	}
+
+	/**
+	 * Edit a specific location.
+	 * $newName must not exist on beforehand.
+	 *
+	 * @param int $id
+	 * @param string $newName
+	 */
+	function editLocation($id, $newName, $newDescription) {
+		$newName = trim($newName);
+		if (strlen($newName) == 0) {
+			return False;
+		}
+
+		$sql = "SELECT COUNT(*) FROM `$this->categoryTable` "
+		     . "WHERE name = %s";
+		$count = $this->db->get_var($this->db->prepare($sql, $newName, $id));
+
+		if ($count == 0) {
+			$sql = "UPDATE `$this->categoryTable` "
+			     . "SET name = %s, "
+			     . "SET description = %s"
+			     . "WHERE id = %d;";
+
+			return $this->db->query($this->db->prepare($sql, $newName, $newDescription, $id));
+		} else {
+			return False;
+		}
+	}
+
+	/**
+	 * Returns a specific location
+	 *
+	 * @param int $id
+	 * @return string
+	 */
+	function getLocation($id) {
+		$sql = "SELECT * FROM `$this->locationTable` WHERE id = " . intval($id);
+		return $this->db->get_results($sql);
+	}
+
+	/**
+	 * Returns a list of all locations
+	 *
+	 * @return array
+	 */
+	function getLocationList () {
+		$sql = "SELECT * FROM `$this->locationTable`;";
+		return $this->db->get_results($sql);
+	}
+
+	/**
+	 * Deletes a specific location.
+	 * Will check if any posts refer to it, before deletion.
+	 *
+	 * @param int $id
+	 * @return bool or number of rows acted upon
+	 */
+	function deleteLocation($id) {
+		$sql = "SELECT COUNT(*) FROM `$this->mainTable` WHERE locationId = " . intval($id);
+		$count = $this->db->get_var($sql);
+
+		if ($count == 0) {
+			$sql = "DELETE FROM `$this->categoryTable` WHERE id = " . intval($id);
+			return $this->db->query($sql);
+		} else {
+			return False;
+		}
+	}
+
+	/**
 	 * Returns a specific event.
 	 *
 	 * @param int $id
