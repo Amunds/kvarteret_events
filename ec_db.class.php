@@ -570,6 +570,123 @@ class EC_DB {
 	}
 
 	/**
+	 * Returns a list of events based on a set of filters, eg. date, location, category etc.
+	 * Will order by ascending dates.
+	 *
+	 * @param array $filter
+	 * @param int $limit
+	 * @param int offset
+	 * @return array
+	 */
+	function getFilteredEventList ($filter, $limit, $offset) {
+		/*
+		 * filter can contain the following keys:
+		 * locationId => array(id1, id2, ...) or locationId => id1
+		 * categoryId => array(id1, id2, ...) or categoryId => id1
+		 * eventDateStart => array('date' => 'Y-m-d' format, 'req' => ('<', '<=', '=', '>=' or '>')
+		 * eventDateEnd => array('date' => 'Y-m-d' format, 'req' => ('<', '<=', '=', '>=' or '>')
+		 */
+		
+		/*
+		 * example
+		 * $filter = array(
+		 *  // We pick all events which end on this specific date (2010-10-19) and further
+		 *  'eventDateEnd' => array('date' => '2010-10-19', 'req' => '>='), 
+		 *  'locationId' => 1,
+		 *  'categoryId' => array(3,2)
+		 * );
+		 */
+		
+		$legalRequirements = array('<', '<=', '=', '>=', '>');
+		
+		if (!is_array($filter)) {
+			$filter = array();
+		}
+		
+		$input = array();
+		
+		$sql = "SELECT * FROM `$this->mainTable`";
+		
+		$hasFilter = false;
+		if (count($filter) > 0) {
+			$sql .= " WHERE ";
+			$hasFilter = true;
+		}
+		
+		if (isset($filter['locationId'])) {
+			$e = $filter['locationId'];
+
+			if (is_array($e) && !empty($e)) {
+				$tmpSql = "";
+				foreach ($e as $v) {
+					$tempSql .= "%d,";
+					$input[] = intval($v);
+				}
+				
+				$sql .= "(locationId IN (" . substr($tempSql, 0, -1) . ")) AND ";
+				unset($tempSql);
+			} else {
+				$sql .= "(locationId = %d) AND ";
+				$input[] = intval($e);
+			}
+			unset($e);
+		}
+		
+		if (isset($filter['categoryId'])) {
+			$e = $filter['categoryId'];
+
+			if (is_array($e) && !empty($e)) {
+				$tmpSql = "";
+				foreach ($e as $v) {
+					$tempSql .= "%d,";
+					$input[] = intval($v);
+				}
+
+				$sql .= "(categoryId IN (" . substr($tempSql, 0, -1) . ")) AND ";
+				unset($tempSql);
+			} else {
+				$sql .= "(categoryId = %d) AND ";
+				$input[] = intval($e);
+			}
+			unset($e);
+		}
+
+		if (isset($filter['eventDateStart']) && is_array($filter['eventDateStart'])) {
+			$e = $filter['eventDateStart'];
+
+			if (isset($e['date']) && isset($e['req']) && in_array($e['req'], $legalRequirements)) {
+				$sql .= "(eventDateStart " . $e['req'] . " %s)";
+				$input[] = strval($e['date']);
+			}
+			unset($e);
+		}
+		
+		if (isset($filter['eventDateEnd']) && is_array($filter['eventDateEnd'])) {
+			$e = $filter['eventDateEnd'];
+
+			if (isset($e['date']) && isset($e['req']) && in_array($e['req'], $legalRequirements)) {
+				$sql .= "(eventDateEnd " . $e['req'] . " %s)";
+				$input[] = strval($e['date']);
+			}
+			unset($e);
+		}
+		
+		$sql .= " ORDER BY eventStartDate ASC";
+		
+		if ($limit > 0) {
+			$sql .= " LIMIT " . intval($limit);
+			if ($offset > 0) {
+				$sql .= " OFFSET " . intval($offset);
+			}
+		}
+		
+		if ($hasFilter) {
+			$sql = $this->db->prepare($sql, $input);
+		}
+		return $this->db->get_results($sql);
+	}
+
+	/**
 	 * Returns upcoming events.
 	 * @param int $num 		number of events to retrieve
 	 * @return array
