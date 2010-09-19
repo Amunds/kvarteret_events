@@ -328,7 +328,6 @@ class EC_DB {
 		// since we are using wpdb->prepare()
 		$postID = is_null($postID) ? "NULL" : "'$postID'";
 		//$title = is_null($postID) ? "NULL" : "'$title'";
-		$location = is_null($location) ? "NULL" : "'$location'";
 
 		$location = is_null($location) ? "NULL" : "'$location'";
 		$locationColumn = is_int(trim($location, "'")) ? "locationId" : "eventLocation";
