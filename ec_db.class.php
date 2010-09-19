@@ -81,9 +81,9 @@ class EC_DB {
 	 */
 	var $postsTable;
 
-        var $categoryTable;
+	var $categoryTable;
 
-        var $locationTable;
+	var $locationTable;
 
 	/**
 	 * Holds the main WPEC table version.
@@ -98,7 +98,7 @@ class EC_DB {
 	 */
 	function EC_DB() {
 		global $wpdb;
-		$this->dbVersion = "108";
+		$this->dbVersion = "109";
 		$this->db = $wpdb;
 		$this->mainTable = $this->db->prefix . 'eventscalendar_main';
 		
@@ -108,7 +108,7 @@ class EC_DB {
 			$this->mainTable = $this->mainTableCaps;
 
 		$this->postsTable = $this->db->prefix . 'posts';
-		$this->categoryTable = $this->db->prefix . 'eventscalendar_categories';
+		$this->categoryTable = $this->db->prefix . 'eventscalendar_category';
 		$this->locationTable = $this->db->prefix . 'eventscalendar_location';
 	}
 
@@ -120,28 +120,88 @@ class EC_DB {
 	 *       from the new version, we just execute the SQL.
 	 */
 	function createTable() {
-		if ($this->db->get_var("show tables like '$this->mainTable'") != $this->mainTable ) {
-			$sql = "CREATE TABLE " . $this->mainTable . " (
-				id mediumint(9) NOT NULL AUTO_INCREMENT,
-				eventTitle varchar(255) CHARACTER SET utf8 NOT NULL,
-				eventDescription text CHARACTER SET utf8 NOT NULL,
-				eventLocation varchar(255) CHARACTER SET utf8 default NULL,
-				eventLinkout varchar(255) CHARACTER SET utf8 default NULL,
-				eventStartDate date NOT NULL,
-				eventStartTime time default NULL,
-				eventEndDate date NOT NULL,
-				eventEndTime time default NULL,
-				accessLevel varchar(255) CHARACTER SET utf8 NOT NULL default 'public',
-				postID mediumint(9) NULL DEFAULT NULL,
-				PRIMARY KEY  id (id)
-				);";
+
+		/**
+		 * Table definition and creation routines for the category table
+		 */
+
+		$sqlCategoryTable = "CREATE TABLE " . $this->categoryTable . " (
+			id mediumint(9) NOT NULL AUTO_INCREMENT,
+			name varchar(255) CHARACTER SET utf8 NOT NULL,
+			UNIQUE (name),
+			PRIMARY KEY  id (id)
+			);";
+
+		if ($this->db->get_var("show tables like '$this->categoryTable'") != $this->categoryTable) {
 
 			require_once(ABSPATH . "wp-admin/upgrade-functions.php");
-			dbDelta($sql);
+			dbDelta($sqlCategoryTable);
+
+			// Request whithout CHARACTER SET utf8 if the CREATE TABLE failed
+			if ($this->db->get_var("show tables like '$this->categoryTable'") != $this->categoryTable ) {
+				$sql = str_replace("CHARACTER SET utf8 ","",$sqlCategoryTable);
+				dbDelta($sql);
+			}
+		}
+
+		/**
+		 * Table definition and creation routines for the location table
+		 */
+
+		$sqlLocationTable = "CREATE TABLE " . $this->locationTable . " (
+			id mediumint(9) NOT NULL AUTO_INCREMENT,
+			name varchar(255) CHARACTER SET utf8 NOT NULL,
+			description text CHARACTER SET utf8,
+			UNIQUE (name),
+			PRIMARY KEY  id (id)
+			);";
+
+		if ($this->db->get_var("show tables like '$this->locationTable'") != $this->locationTable) {
+
+			require_once(ABSPATH . "wp-admin/upgrade-functions.php");
+			dbDelta($sqlLocationTable);
+
+			// Request whithout CHARACTER SET utf8 if the CREATE TABLE failed
+			if ($this->db->get_var("show tables like '$this->locationTable'") != $this->locationTable ) {
+				$sql = str_replace("CHARACTER SET utf8 ","",$sqlLocationTable);
+				dbDelta($sql);
+			}
+		}
+
+		/**
+		 * Table definition and creation routines for the main table
+		 */
+
+		// The locationId can be used when using recurring locations.
+		// The eventLocation columns is to be used when using non-recurring locations.
+		$sqlMainTable = "CREATE TABLE " . $this->mainTable . " (
+			id mediumint(9) NOT NULL AUTO_INCREMENT,
+			eventTitle varchar(255) CHARACTER SET utf8 NOT NULL,
+			eventDescription text CHARACTER SET utf8 NOT NULL,
+			eventLocation varchar(255) CHARACTER SET utf8 default NULL,
+			eventLinkout varchar(255) CHARACTER SET utf8 default NULL,
+			eventStartDate date NOT NULL,
+			eventStartTime time default NULL,
+			eventEndDate date NOT NULL,
+			eventEndTime time default NULL,
+			accessLevel varchar(255) CHARACTER SET utf8 NOT NULL default 'public',
+			postID mediumint(9) NULL DEFAULT NULL,
+			locationId integer,
+			categoryId integer NOT NULL,
+			PRIMARY KEY  id (id),
+			INDEX (locationId),
+			INDEX (categoryId),
+			FOREIGN KEY (locationId) REFERENCES " . $this->locationTable . "(id),
+			FOREIGN KEY (categoryId) REFERENCES " . $this->categoryTable . "(id)
+			);";
+
+		if ($this->db->get_var("show tables like '$this->mainTable'") != $this->mainTable ) {
+			require_once(ABSPATH . "wp-admin/upgrade-functions.php");
+			dbDelta($sqlMainTable);
 
 			// Request whithout CHARACTER SET utf8 if the CREATE TABLE failed
 			if ($this->db->get_var("show tables like '$this->mainTable'") != $this->mainTable ) {
-				$sql = str_replace("CHARACTER SET utf8 ","",$sql);
+				$sql = str_replace("CHARACTER SET utf8 ","",$sqlMainTable);
 				dbDelta($sql);
 			}
 			add_option("events_calendar_db_version", $this->dbVersion);
@@ -150,23 +210,11 @@ class EC_DB {
 		$installed_ver = get_option( "events_calendar_db_version" );
 
 		if ($installed_ver != $this->dbVersion) {
-			$sql = "CREATE TABLE " . $this->mainTable . " (
-				id mediumint(9) NOT NULL AUTO_INCREMENT,
-				eventTitle varchar(255) CHARACTER SET utf8 NOT NULL,
-				eventDescription text CHARACTER SET utf8 NOT NULL,
-				eventLocation varchar(255) CHARACTER SET utf8 default NULL,
-				eventLinkout varchar(255) CHARACTER SET utf8 default NULL,
-				eventStartDate date NOT NULL,
-				eventStartTime time default NULL,
-				eventEndDate date NOT NULL,
-				eventEndTime time default NULL,
-				accessLevel varchar(255) CHARACTER SET utf8 NOT NULL default 'public',
-				postID mediumint(9) NULL DEFAULT NULL,
-				PRIMARY KEY  id (id)
-				);";
 
 			require_once(ABSPATH . 'wp-admin/upgrade-functions.php');
-			dbDelta($sql);
+			dbDelta($sqlCategoryTable);
+			dbDelta($sqlLocationTable);
+			dbDelta($sqlMainTable);
 
 			$this->db->query("UPDATE " . $this->mainTable . " SET `eventLocation` = REPLACE(`eventLocation`,' ','');");
 			$this->db->query("UPDATE " . $this->mainTable . " SET `eventLocation` = REPLACE(`eventLocation`,'',NULL);");
