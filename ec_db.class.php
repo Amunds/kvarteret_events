@@ -268,7 +268,7 @@ class EC_DB {
 	 *
 	 * @param int 		$id 			the event id
 	 * @param string 	$title 			the event title
-	 * @param string 	$location 		the event location
+	 * @param string or int	$location 		the event location, either locationId or text
 	 * @param string 	$linkout 		URL to an external web site
 	 * @param string 	$description 		description of the event
 	 * @param date		$startDate 		date of the event. If empty, will be today.
@@ -277,10 +277,14 @@ class EC_DB {
 	 * @param time 		$endTime		end time
 	 * @param int 		$accessLevel 		who has access to this event
 	 * @param int 		$postId 		post id if use activated it
+	 * @param int 		$categoryId 	event category, must be valid
 	 */
-	function addEvent($title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID) {
+	function addEvent($title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId) {
 		$postID = is_null($postID) ? "NULL" : "'$postID'";
+
 		$location = is_null($location) ? "NULL" : "'$location'";
+		$locationColumn = is_int(trim($location, "'")) ? "locationId" : "eventLocation";
+
 		$description = is_null($description) ? "NULL" : "'$description'";
 		$startDate = is_null($startDate) ? "NULL" : "'$startDate'";
 		$endDate = is_null($endDate) ? "NULL" : "'$endDate'";
@@ -288,11 +292,12 @@ class EC_DB {
 		$startTime = is_null($startTime) ? "NULL" : "'$startTime'";
 		$accessLevel = is_null($accessLevel) ? "NULL" : "'$accessLevel'";
 		$endTime = is_null($endTime) ? "NULL" : "'$endTime'";
+		$categoryId = is_null($categoryId) ? "NULL" : "'$categoryId'";
 
 		$sql = "INSERT INTO `$this->mainTable` ("
-			 ."`id`, `eventTitle`, `eventDescription`, `eventLocation`, `eventLinkout`,`eventStartDate`, `eventStartTime`, `eventEndDate`, `eventEndTime`, `accessLevel`, `postID`) "
+			 ."`id`, `eventTitle`, `eventDescription`, `" . $locationColumn . "`, `eventLinkout`,`eventStartDate`, `eventStartTime`, `eventEndDate`, `eventEndTime`, `accessLevel`, `postID`, `categoryId`) "
 			 ."VALUES ("
-			 ."NULL , '$title', $description, $location, $linkout, $startDate, $startTime, $endDate, $endTime , $accessLevel, $postID);";
+			 ."NULL , '$title', $description, $location, $linkout, $startDate, $startTime, $endDate, $endTime , $accessLevel, $postID, $categoryId);";
 
 		$this->db->query($sql);
 	}
@@ -302,7 +307,7 @@ class EC_DB {
 	 *
 	 * @param int 		$id 			the event id
 	 * @param string 	$title 			the event title
-	 * @param string 	$location 		the event location
+	 * @param string or int	$location 		the event location, either locationId or text
 	 * @param string 	$linkout 		URL to an external web site
 	 * @param string 	$description 		description of the event
 	 * @param date 		$startDate 		date of the event. If empty, will be today.
@@ -311,8 +316,9 @@ class EC_DB {
 	 * @param time 		$endTime 		end time
 	 * @param int 		$accessLevel 		who can access this event
 	 * @param int 		$postId 		post id if use activated it
+	 * @param int 		$categoryId 	event category, must be valid
 	 */
-	function editEvent($id, $title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID) {
+	function editEvent($id, $title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId) {
 
 		// just to make sure
 		if (empty($id))
@@ -323,6 +329,11 @@ class EC_DB {
 		$postID = is_null($postID) ? "NULL" : "'$postID'";
 		//$title = is_null($postID) ? "NULL" : "'$title'";
 		$location = is_null($location) ? "NULL" : "'$location'";
+
+		$location = is_null($location) ? "NULL" : "'$location'";
+		$locationColumn = is_int(trim($location, "'")) ? "locationId" : "eventLocation";
+		$resetOtherLocationColumn = is_int(trim($location, "'")) ? "eventLocation" : "locationId";
+
 		$description = is_null($description) ? "NULL" : "'$description'";
 		$startDate = is_null($startDate) ? "NULL" : "'$startDate'";
 		$endDate = is_null($endDate) ? "NULL" : "'$endDate'";
@@ -330,11 +341,13 @@ class EC_DB {
 		$startTime = is_null($startTime) ? "NULL" : "'$startTime'";
 		$accessLevel = is_null($accessLevel) ? "NULL" : "'$accessLevel'";
 		$endTime = is_null($endTime) ? "NULL" : "'$endTime'";
+		$categoryId = is_null($categoryId) ? "NULL" : "'$categoryId'";
 
 		$sql = "UPDATE `$this->mainTable` SET "
 			."`eventTitle` = '$title', "
 			."`eventDescription` = $description, "
-			."`eventLocation` = $location, "
+			."`" .  $locationColumn . "` = $location, "
+			."`" .  $resetOtherLocationColumn . "` = NULL, "
 			."`eventLinkout` = $linkout, "
 			."`eventStartDate` = $startDate, "
 			."`eventStartTime` = $startTime, "
@@ -342,6 +355,7 @@ class EC_DB {
 			."`eventEndTime` = $endTime, "
 			."`postID` = $postID, "
 			."`accessLevel` = $accessLevel"
+			."`categoryId` = $categoryId"
 			." WHERE `id` = $id LIMIT 1;";
 
 		$this->db->query($sql);
