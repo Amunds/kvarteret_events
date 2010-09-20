@@ -16,4 +16,4 @@ Installation
 2. Activate the plugin through the Plugins menu in the Dashboard.
 3. Set options under Events Calendar/Options on the admin menu.
 
-*When updating, you will need to deactivate and reactivate the plugin.*
+**When updating, you will need to deactivate and reactivate the plugin.**
