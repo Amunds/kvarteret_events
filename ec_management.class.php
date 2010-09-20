@@ -124,6 +124,7 @@ class EC_Management {
 			$location = isset($_POST['EC_location']) && !empty($_POST['EC_location']) ? $wpdb->escape($_POST['EC_location']) : null;
 			$linkout = isset($_POST['EC_linkout']) && !empty($_POST['EC_linkout']) && ($_POST['EC_linkout'] != $this->deflinkout) ? $wpdb->escape($_POST['EC_linkout']) : null;
 			$description = $wpdb->escape($_POST['EC_description']);
+      $categoryId = isset($_POST['EC_categoryId']) && !empty($_POST['EC_categoryId'])? $_POST['EC_categoryId'] : null;
 			$startDate = isset($_POST['EC_startDate']) && !empty($_POST['EC_startDate'])? $_POST['EC_startDate'] : date('Y-m-d');
 			$startTime = isset($_POST['EC_startTime']) && !empty($_POST['EC_startTime']) ? $_POST['EC_startTime'] : null;
 			$endDate = isset($_POST['EC_endDate']) && !empty($_POST['EC_endDate']) ? $_POST['EC_endDate'] : $startDate;
@@ -176,7 +177,7 @@ class EC_Management {
 			  $postID = $results[0]->id;
 			}
 
-			$this->addEvent($title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID);
+			$this->addEvent($title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId);
 
 			$splitDate = split("-", $startDate);
 			$this->month = $splitDate[1];
@@ -201,6 +202,7 @@ class EC_Management {
 			$location = isset($_POST['EC_location']) && !empty($_POST['EC_location']) ? $_POST['EC_location'] : null;
 			$linkout = isset($_POST['EC_linkout']) && !empty($_POST['EC_linkout']) && ($_POST['EC_linkout'] != $this->deflinkout) ? $_POST['EC_linkout'] : null;
 			$description = $_POST['EC_description'];
+			$categoryId = $_POST['EC_categoryId'];
 
 			$startDate = isset($_POST['EC_startDate']) && !empty($_POST['EC_startDate'])? $_POST['EC_startDate'] : date('Y-m-d');
 			$startTime = isset($_POST['EC_startTime']) && !empty($_POST['EC_startTime']) ? $_POST['EC_startTime'] : null;
@@ -209,7 +211,7 @@ class EC_Management {
 			$endTime = isset($_POST['EC_endTime']) && !empty($_POST['EC_endTime']) ? $_POST['EC_endTime'] : null;
 			$accessLevel = $_POST['EC_accessLevel'];
 			$postID = isset($_POST['EC_postID']) && !empty($_POST['EC_postID']) ? $_POST['EC_postID'] : null;
-			$this->editEvent($id, $title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID);
+			$this->editEvent($id, $title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId);
 			$splitDate = split("-", $startDate);
 			$this->month = $splitDate[1];
 			$this->year = $splitDate[0];
@@ -244,9 +246,10 @@ class EC_Management {
 	 * @param string $endTime	ending time of the event. 
 	 * @param int    $accessLevel	who can access this event.
 	 * @param int    $postID	associated post id if available.
+	 * @param int 		$categoryId 	event category, must be valid
 	 */
-	function addEvent($title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID) {
-		$this->db->addEvent($title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID);
+	function addEvent($title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId) {
+		$this->db->addEvent($title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId);
 		return;
 	}
 
@@ -264,9 +267,10 @@ class EC_Management {
 	 * @param string $endTime	ending time of the event. 
 	 * @param int    $accessLevel	who can access this event.
 	 * @param int    $postID	associated post id if available.
+	 * @param int 	 $categoryId 	event category, must be valid
 	 */
-	function editEvent($id, $title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID) {
-		$this->db->editEvent($id, addslashes($title), $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID);
+	function editEvent($id, $title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId) {
+		$this->db->editEvent($id, addslashes($title), $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId);
 	}
 
 	/**
@@ -290,6 +294,10 @@ class EC_Management {
         <tr>
           <th scope="row"><label for="title"><?php _e('Title','events-calendar'); ?></label></th>
           <td><input class="ec-edit-form-text" type="text" name="EC_title" id="EC_title" /></td>
+        </tr>
+        <tr>
+          <th scope="row"><label for="EC_categoryId"><?php _e('CategoryId','events-calendar'); ?></label></th>
+          <td><input class="ec-edit-form-text" type="text" name="EC_categoryId" id="EC_categoryId" /></td>
         </tr>
         <tr>
           <th scope="row"><label for="location"><?php _e('Location','events-calendar'); ?></label></th>
