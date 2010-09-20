@@ -42,6 +42,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 if(!class_exists('EC_DB')):
 
 /**
+ * Helper function to test if a string is an integer
+ *
+ * @param string $str
+ * @return bool
+ */
+function string_is_int($str) {
+	if ((string)$str == (string)(int)$str)) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+/**
  * This class is used by WPEC to access and modify the database.
  *
  * All the DB work needed by WPEC is done through this class. 
