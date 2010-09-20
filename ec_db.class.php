@@ -48,7 +48,7 @@ if(!class_exists('EC_DB')):
  * @return bool
  */
 function string_is_int($str) {
-	if ((string)$str == (string)(int)$str)) {
+	if ((string)$str == (string)(int)$str) {
 		return true;
 	} else {
 		return false;
