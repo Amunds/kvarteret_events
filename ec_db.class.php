@@ -296,8 +296,9 @@ class EC_DB {
 	function addEvent($title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId) {
 		$postID = is_null($postID) ? "NULL" : "'$postID'";
 
+		// The integer check has to be made _before_ we treat $location as a column value, makes life easier
+		$locationColumn = string_is_int(trim($location)) ? "locationId" : "eventLocation";
 		$location = is_null($location) ? "NULL" : "'$location'";
-		$locationColumn = is_int(trim($location, "'")) ? "locationId" : "eventLocation";
 
 		$description = is_null($description) ? "NULL" : "'$description'";
 		$startDate = is_null($startDate) ? "NULL" : "'$startDate'";
@@ -343,9 +344,10 @@ class EC_DB {
 		$postID = is_null($postID) ? "NULL" : "'$postID'";
 		//$title = is_null($postID) ? "NULL" : "'$title'";
 
+		// The integer check has to be made _before_ we treat $location as a column value, makes life easier
+		$locationColumn = string_is_int(trim($location)) ? "locationId" : "eventLocation";
 		$location = is_null($location) ? "NULL" : "'$location'";
-		$locationColumn = is_int(trim($location, "'")) ? "locationId" : "eventLocation";
-		$resetOtherLocationColumn = is_int(trim($location, "'")) ? "eventLocation" : "locationId";
+		$resetOtherLocationColumn = ($locationColumn == 'locationId') ? "eventLocation" : "locationId";
 
 		$description = is_null($description) ? "NULL" : "'$description'";
 		$startDate = is_null($startDate) ? "NULL" : "'$startDate'";
