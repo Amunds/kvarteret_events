@@ -719,6 +719,7 @@ class EC_DB {
 		 * filter can contain the following keys:
 		 * locationId => array(id1, id2, ...) or locationId => id1
 		 * categoryId => array(id1, id2, ...) or categoryId => id1
+		 * arrangerId => array(id1, id2, ...) or arrangerId => id1
 		 * eventDateStart => array('date' => 'Y-m-d' format, 'req' => ('<', '<=', '=', '>=' or '>')
 		 * eventDateEnd => array('date' => 'Y-m-d' format, 'req' => ('<', '<=', '=', '>=' or '>')
 		 */
@@ -782,6 +783,25 @@ class EC_DB {
 				unset($tempSql);
 			} else {
 				$sql .= "(categoryId = %d) AND ";
+				$input[] = intval($e);
+			}
+			unset($e);
+		}
+
+		if (isset($filter['arrangerId'])) {
+			$e = $filter['arrangerId'];
+
+			if (is_array($e) && !empty($e)) {
+				$tmpSql = "";
+				foreach ($e as $v) {
+					$tempSql .= "%d,";
+					$input[] = intval($v);
+				}
+
+				$sql .= "(arrangerId IN (" . substr($tempSql, 0, -1) . ")) AND ";
+				unset($tempSql);
+			} else {
+				$sql .= "(arrangerId = %d) AND ";
 				$input[] = intval($e);
 			}
 			unset($e);
