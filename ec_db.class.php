@@ -99,6 +99,8 @@ class EC_DB {
 
 	var $locationTable;
 
+	var $arrangerTable;
+
 	/**
 	 * Holds the main WPEC table version.
 	 * @var int
@@ -112,7 +114,7 @@ class EC_DB {
 	 */
 	function EC_DB() {
 		global $wpdb;
-		$this->dbVersion = "109";
+		$this->dbVersion = "110";
 		$this->db = $wpdb;
 		$this->mainTable = $this->db->prefix . 'eventscalendar_main';
 		
@@ -124,6 +126,7 @@ class EC_DB {
 		$this->postsTable = $this->db->prefix . 'posts';
 		$this->categoryTable = $this->db->prefix . 'eventscalendar_category';
 		$this->locationTable = $this->db->prefix . 'eventscalendar_location';
+		$this->arrangerTable = $this->db->prefix . 'eventscalendar_arranger';
 	}
 
 	/**
@@ -183,6 +186,30 @@ class EC_DB {
 		}
 
 		/**
+		 * Table definition and creation routines for the arranger table
+		 */
+
+		$sqlArrangerTable = "CREATE TABLE " . $this->arrangerTable . " (
+			id mediumint(9) NOT NULL AUTO_INCREMENT,
+			name varchar(255) CHARACTER SET utf8 NOT NULL,
+			description text CHARACTER SET utf8,
+			UNIQUE (name),
+			PRIMARY KEY  id (id)
+			);";
+
+		if ($this->db->get_var("show tables like '$this->arrangerTable'") != $this->arrangerTable) {
+
+			require_once(ABSPATH . "wp-admin/upgrade-functions.php");
+			dbDelta($sqlArrangerTable);
+
+			// Request whithout CHARACTER SET utf8 if the CREATE TABLE failed
+			if ($this->db->get_var("show tables like '$this->arrangerTable'") != $this->arrangerTable ) {
+				$sql = str_replace("CHARACTER SET utf8 ","",$sqlArrangerTable);
+				dbDelta($sql);
+			}
+		}
+
+		/**
 		 * Table definition and creation routines for the main table
 		 */
 
@@ -202,11 +229,14 @@ class EC_DB {
 			postID mediumint(9) NULL DEFAULT NULL,
 			locationId integer,
 			categoryId integer NOT NULL,
+			arrangerId integer NOT NULL,
 			PRIMARY KEY  id (id),
 			INDEX (locationId),
 			INDEX (categoryId),
+			INDEX (arrangerId),
 			FOREIGN KEY (locationId) REFERENCES " . $this->locationTable . "(id),
-			FOREIGN KEY (categoryId) REFERENCES " . $this->categoryTable . "(id)
+			FOREIGN KEY (categoryId) REFERENCES " . $this->categoryTable . "(id),
+			FOREIGN KEY (arrangerId) REFERENCES " . $this->arrangerTable . "(id)
 			);";
 
 		if ($this->db->get_var("show tables like '$this->mainTable'") != $this->mainTable ) {
@@ -228,6 +258,7 @@ class EC_DB {
 			require_once(ABSPATH . 'wp-admin/upgrade-functions.php');
 			dbDelta($sqlCategoryTable);
 			dbDelta($sqlLocationTable);
+			dbDelta($sqlArrangerTable);
 			dbDelta($sqlMainTable);
 
 			$this->db->query("UPDATE " . $this->mainTable . " SET `eventLocation` = REPLACE(`eventLocation`,' ','');");
