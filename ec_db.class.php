@@ -518,12 +518,12 @@ class EC_DB {
 			return False;
 		}
 
-		$sql = "SELECT COUNT(*) FROM `$this->categoryTable` "
+		$sql = "SELECT COUNT(*) FROM `$this->locationTable` "
 		     . "WHERE name = %s";
 		$count = $this->db->get_var($this->db->prepare($sql, $newName, $id));
 
 		if ($count == 0) {
-			$sql = "UPDATE `$this->categoryTable` "
+			$sql = "UPDATE `$this->locationTable` "
 			     . "SET name = %s, "
 			     . "SET description = %s"
 			     . "WHERE id = %d;";
@@ -567,7 +567,7 @@ class EC_DB {
 		$count = $this->db->get_var($sql);
 
 		if ($count == 0) {
-			$sql = "DELETE FROM `$this->categoryTable` WHERE id = " . intval($id);
+			$sql = "DELETE FROM `$this->locationTable` WHERE id = " . intval($id);
 			return $this->db->query($sql);
 		} else {
 			return False;
