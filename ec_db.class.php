@@ -324,7 +324,7 @@ class EC_DB {
 	 * @param int 		$postId 		post id if use activated it
 	 * @param int 		$categoryId 	event category, must be valid
 	 */
-	function addEvent($title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId) {
+	function addEvent($title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId, $arrangerId) {
 		$postID = is_null($postID) ? "NULL" : "'$postID'";
 
 		// The integer check has to be made _before_ we treat $location as a column value, makes life easier
@@ -339,11 +339,12 @@ class EC_DB {
 		$accessLevel = is_null($accessLevel) ? "NULL" : "'$accessLevel'";
 		$endTime = is_null($endTime) ? "NULL" : "'$endTime'";
 		$categoryId = is_null($categoryId) ? "NULL" : "'$categoryId'";
+		$arrangerId = is_null($arrangerId) ? "NULL" : "'$arrangerId'";
 
 		$sql = "INSERT INTO `$this->mainTable` ("
-			 ."`id`, `eventTitle`, `eventDescription`, `" . $locationColumn . "`, `eventLinkout`,`eventStartDate`, `eventStartTime`, `eventEndDate`, `eventEndTime`, `accessLevel`, `postID`, `categoryId`) "
+			 ."`id`, `eventTitle`, `eventDescription`, `" . $locationColumn . "`, `eventLinkout`,`eventStartDate`, `eventStartTime`, `eventEndDate`, `eventEndTime`, `accessLevel`, `postID`, `categoryId`, `arrangerId`) "
 			 ."VALUES ("
-			 ."NULL , '$title', $description, $location, $linkout, $startDate, $startTime, $endDate, $endTime , $accessLevel, $postID, $categoryId);";
+			 ."NULL , '$title', $description, $location, $linkout, $startDate, $startTime, $endDate, $endTime , $accessLevel, $postID, $categoryId, $arrangerId);";
 
 		$this->db->query($sql);
 	}
@@ -364,7 +365,7 @@ class EC_DB {
 	 * @param int 		$postId 		post id if use activated it
 	 * @param int 		$categoryId 	event category, must be valid
 	 */
-	function editEvent($id, $title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId) {
+	function editEvent($id, $title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId, $arrangerId) {
 
 		// just to make sure
 		if (empty($id))
@@ -388,6 +389,7 @@ class EC_DB {
 		$accessLevel = is_null($accessLevel) ? "NULL" : "'$accessLevel'";
 		$endTime = is_null($endTime) ? "NULL" : "'$endTime'";
 		$categoryId = is_null($categoryId) ? "NULL" : "'$categoryId'";
+		$arrangerId = is_null($arrangerId) ? "NULL" : "'$arrangerId'";
 
 		$sql = "UPDATE `$this->mainTable` SET "
 			."`eventTitle` = '$title', "
@@ -401,7 +403,8 @@ class EC_DB {
 			."`eventEndTime` = $endTime, "
 			."`postID` = $postID, "
 			."`accessLevel` = $accessLevel, "
-			."`categoryId` = $categoryId"
+			."`categoryId` = $categoryId, "
+			."`arrangerId` = $arrangerId"
 			." WHERE `id` = $id LIMIT 1;";
 
 		$this->db->query($sql);
