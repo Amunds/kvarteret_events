@@ -609,6 +609,92 @@ class EC_DB {
 	}
 
 	/**
+	 * ARRANGER FUNCTIONS
+	 */
+
+	/**
+	 * Creates a specific arranger, must not exist before
+	 *
+	 * @param int $id
+	 * @return int number of rows acted upon
+	 */
+	function addArranger($name, $description = null) {
+		$sql = "INSERT INTO `$this->arrangerTable` "
+		     . "(name, description) "
+		     . "VALUES (%s, %s);";
+		return $this->db->query($this->db->prepare($sql, $name, $description));
+	}
+
+	/**
+	 * Edit a specific location.
+	 * $newName must not exist on beforehand.
+	 *
+	 * @param int $id
+	 * @param string $newName
+	 */
+	function editArranger($id, $newName, $newDescription) {
+		$newName = trim($newName);
+		if (strlen($newName) == 0) {
+			return False;
+		}
+
+		$sql = "SELECT COUNT(*) FROM `$this->arrangerTable` "
+		     . "WHERE name = %s";
+		$count = $this->db->get_var($this->db->prepare($sql, $newName, $id));
+
+		if ($count == 0) {
+			$sql = "UPDATE `$this->arrangerTable` "
+			     . "SET name = %s, "
+			     . "SET description = %s"
+			     . "WHERE id = %d;";
+
+			return $this->db->query($this->db->prepare($sql, $newName, $newDescription, $id));
+		} else {
+			return False;
+		}
+	}
+
+	/**
+	 * Returns a specific arranger
+	 *
+	 * @param int $id
+	 * @return string
+	 */
+	function getArranger($id) {
+		$sql = "SELECT * FROM `$this->arrangerTable` WHERE id = " . intval($id);
+		return $this->db->get_results($sql);
+	}
+
+	/**
+	 * Returns a list of all arrangers
+	 *
+	 * @return array
+	 */
+	function getArrangerList () {
+		$sql = "SELECT * FROM `$this->arrangerTable`;";
+		return $this->db->get_results($sql);
+	}
+
+	/**
+	 * Deletes a specific arranger.
+	 * Will check if any posts refer to it, before deletion.
+	 *
+	 * @param int $id
+	 * @return bool or number of rows acted upon
+	 */
+	function deleteArranger($id) {
+		$sql = "SELECT COUNT(*) FROM `$this->mainTable` WHERE arrangerId = " . intval($id);
+		$count = $this->db->get_var($sql);
+
+		if ($count == 0) {
+			$sql = "DELETE FROM `$this->arrangerTable` WHERE id = " . intval($id);
+			return $this->db->query($sql);
+		} else {
+			return False;
+		}
+	}
+
+	/**
 	 * Returns a specific event.
 	 *
 	 * @param int $id
