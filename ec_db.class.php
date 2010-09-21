@@ -369,7 +369,7 @@ class EC_DB {
 			."`eventEndDate` = $endDate, "
 			."`eventEndTime` = $endTime, "
 			."`postID` = $postID, "
-			."`accessLevel` = $accessLevel"
+			."`accessLevel` = $accessLevel, "
 			."`categoryId` = $categoryId"
 			." WHERE `id` = $id LIMIT 1;";
 
