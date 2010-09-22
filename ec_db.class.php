@@ -913,7 +913,7 @@ class EC_DB {
 			unset($e);
 		}
 		
-		$sql .= " ORDER BY eventStartDate ASC";
+		$sql .= " ORDER BY eventStartDate ASC, eventStartTime ASC";
 		
 		if ($limit > 0) {
 			$sql .= " LIMIT " . intval($limit);
