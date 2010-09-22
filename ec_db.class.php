@@ -709,7 +709,7 @@ class EC_DB {
 
 	/**
 	 * Deletes a specific arranger.
-	 * Will check if any posts refer to it, before deletion.
+	 * Will check if any posts or user relationships refer to it, before deletion.
 	 *
 	 * @param int $id
 	 * @return bool or number of rows acted upon
@@ -718,7 +718,9 @@ class EC_DB {
 		$sql = "SELECT COUNT(*) FROM `$this->mainTable` WHERE arrangerId = " . intval($id);
 		$count = $this->db->get_var($sql);
 
-		if ($count == 0) {
+		$countUserRelation = count($this->getArrangerUserRelation($id, 'arranger'));
+
+		if (($count == 0) && ($countUserRelation == 0)){
 			$sql = "DELETE FROM `$this->arrangerTable` WHERE id = " . intval($id);
 			return $this->db->query($sql);
 		} else {
