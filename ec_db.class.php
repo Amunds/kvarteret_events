@@ -118,7 +118,7 @@ class EC_DB {
 	 */
 	function EC_DB() {
 		global $wpdb;
-		$this->dbVersion = "111";
+		$this->dbVersion = "112";
 		$this->db = $wpdb;
 		$this->mainTable = $this->db->prefix . 'eventscalendar_main';
 		
@@ -199,6 +199,7 @@ class EC_DB {
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
 			name varchar(255) CHARACTER SET utf8 NOT NULL,
 			description text CHARACTER SET utf8,
+			url varchar(512) CHARACTER SET utf8,
 			UNIQUE (name),
 			PRIMARY KEY  id (id)
 			);";
@@ -647,14 +648,17 @@ class EC_DB {
 	/**
 	 * Creates a specific arranger, must not exist before
 	 *
-	 * @param int $id
-	 * @return int number of rows acted upon
+	 * @param string $name
+	 * @param string $description
+	 * @param string $url
+	 * @return int The id of the inserted row
 	 */
-	function addArranger($name, $description = null) {
+	function addArranger($name, $description = null, $url = null) {
 		$sql = "INSERT INTO `$this->arrangerTable` "
-		     . "(name, description) "
-		     . "VALUES (%s, %s);";
-		return $this->db->query($this->db->prepare($sql, $name, $description));
+		     . "(name, description, url) "
+		     . "VALUES (%s, %s, %s);";
+		$this->db->query($this->db->prepare($sql, $name, $description, $url));
+		return $this->db->insert_id;
 	}
 
 	/**
@@ -663,8 +667,10 @@ class EC_DB {
 	 *
 	 * @param int $id
 	 * @param string $newName
+	 * @param string $newDescription
+	 * @param string $newUrl
 	 */
-	function editArranger($id, $newName, $newDescription) {
+	function editArranger($id, $newName, $newDescription, $newUrl) {
 		$newName = trim($newName);
 		if (strlen($newName) == 0) {
 			return False;
@@ -677,10 +683,11 @@ class EC_DB {
 		if ($count == 0) {
 			$sql = "UPDATE `$this->arrangerTable` "
 			     . "SET name = %s, "
-			     . "SET description = %s"
+			     . "SET description = %s, "
+			     . "SET url = %s "
 			     . "WHERE id = %d;";
 
-			return $this->db->query($this->db->prepare($sql, $newName, $newDescription, $id));
+			return $this->db->query($this->db->prepare($sql, $newName, $newDescription, $newUrl, $id));
 		} else {
 			return False;
 		}
