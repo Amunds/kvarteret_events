@@ -76,6 +76,7 @@ require_once(EVENTSCALENDARCLASSPATH.DS.'ec_calendar.class.php');
 require_once(EVENTSCALENDARCLASSPATH.DS.'ec_db.class.php');
 require_once(EVENTSCALENDARCLASSPATH.DS.'ec_widget.class.php');
 require_once(EVENTSCALENDARCLASSPATH.DS.'ec_management.class.php');
+require_once(EVENTSCALENDARCLASSPATH.DS.'ec_json.class.php');
 require_once(ABSPATH.'wp-includes/pluggable.php');
 
 /** Init Localisation */
@@ -128,6 +129,14 @@ if(isset($_GET['EC_action']) && $_GET['EC_action'] == 'ajaxDelete') {
   $db = new EC_DB();
   $db->deleteEvent($_GET['EC_id']);
   exit();
+}
+
+/**
+ * $_GET['EC_json']
+ */
+if (isset($_GET['EC_json'])) {
+	$json = new EC_JSON();
+	exit();
 }
 
 /**
