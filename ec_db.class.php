@@ -727,6 +727,58 @@ class EC_DB {
 	}
 
 	/**
+	 * Makes a relationship between a wordpress user and an arranger
+	 * Will check if arranger and user exist before the query is executed.
+	 *
+	 * @param	int	$arrangerId	A valid arrangerId
+	 * @param	int	$userId	A valid userId
+	 */
+	function addArrangerUser ($arrangerId, $userId) {
+		$sql = "INSERT INTO `$this->arrangerUserTable` (arrangerId, userId) VALUES (%d, %d)";
+
+		if (!get_userdata($userId) || (count($this->getArranger($arrangerId)) == 0)) {
+			return False;
+		} else {
+			return $this->db->query($this->db->prepare($sql, $arrangerId, $userId));
+		}
+	}
+
+	/**
+	 * Delets a relation between a user and an arranger
+	 *
+	 * @param	int	$arrangerId	A valid arrangerId
+	 * @param	int	$userId	A valid userId
+	 * @return	int	Number of rows that where deleted
+	 */
+	function deleteArrangerUser ($arrangerId, $userId) {
+		// This one could get a little troublesome when a user is removed from wordpress.
+		$sql = "DELETE FROM `$this->arrangerUserTable` WHERE arrangerId = %d AND userId = %d";
+		return $this->db->query($this->db->prepare($sql, $arrangerId, $userId));
+	}
+
+	/**
+	 * Will fetch a list of either the arrangers a user is related to
+	 * or a list users related to an arranger.
+	 *
+	 * @param	int	$id	A valid id of either user or arranger
+	 * @param	string	$idType	The kind of id you're supplying, can either be user or arranger.
+	 * @return	array or bool	you'll get a bool if $idType is not recognized.
+	 */
+	function getArrangerUserRelation ($id, $idType) {
+		if ($idType == 'user') {
+			$sql = "SELECT * FROM `$this->arrangerUserTable` WHERE userId = %d";
+		} else if ($idType == 'arranger') {
+			$sql = "SELECT * FROM `$this->arrangerUserTable` WHERE arrangerId = %d";
+		}
+
+		if (isset($sql)) {
+			return $this->db->get_results($this->db->prepare($sql, $id));
+		} else {
+			return False;
+		}
+	}
+
+	/**
 	 * Returns a specific event.
 	 *
 	 * @param int $id
