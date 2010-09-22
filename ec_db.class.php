@@ -101,6 +101,10 @@ class EC_DB {
 
 	var $arrangerTable;
 
+	var $arrangerUserTable;
+
+	var $userTable;
+
 	/**
 	 * Holds the main WPEC table version.
 	 * @var int
@@ -114,7 +118,7 @@ class EC_DB {
 	 */
 	function EC_DB() {
 		global $wpdb;
-		$this->dbVersion = "110";
+		$this->dbVersion = "111";
 		$this->db = $wpdb;
 		$this->mainTable = $this->db->prefix . 'eventscalendar_main';
 		
@@ -127,6 +131,8 @@ class EC_DB {
 		$this->categoryTable = $this->db->prefix . 'eventscalendar_category';
 		$this->locationTable = $this->db->prefix . 'eventscalendar_location';
 		$this->arrangerTable = $this->db->prefix . 'eventscalendar_arranger';
+		$this->arrangerUserTable = $this->db->prefix . 'eventscalendar_arrangeruser';
+		$this->userTable = $this->db->prefix . 'users';
 	}
 
 	/**
@@ -210,6 +216,31 @@ class EC_DB {
 		}
 
 		/**
+		 * Table definition and creation routines for the arrangeruser table
+		 * This will restrict users to only use the arranger they've been assigned
+		 */
+
+		$sqlArrangerUserTable = "CREATE TABLE " . $this->arrangerUserTable . " (
+			userId int NOT NULL,
+			arrangerId int NOT NULL,
+			FOREIGN KEY (userId) REFERENCES " . $this->userTable . " (ID),
+			FOREIGN KEY (arrangerId) REFERENCES " . $this->arrangerTable . " (id),
+			PRIMARY KEY  id (userId, arrangerId)
+			);";
+
+		if ($this->db->get_var("show tables like '$this->arrangerUserTable'") != $this->arrangerUserTable) {
+
+			require_once(ABSPATH . "wp-admin/upgrade-functions.php");
+			dbDelta($sqlArrangerUserTable);
+
+			// Request whithout CHARACTER SET utf8 if the CREATE TABLE failed
+			if ($this->db->get_var("show tables like '$this->arrangerUserTable'") != $this->arrangerUserTable ) {
+				$sql = str_replace("CHARACTER SET utf8 ","",$sqlArrangerUserTable);
+				dbDelta($sql);
+			}
+		}
+
+		/**
 		 * Table definition and creation routines for the main table
 		 */
 
@@ -259,6 +290,7 @@ class EC_DB {
 			dbDelta($sqlCategoryTable);
 			dbDelta($sqlLocationTable);
 			dbDelta($sqlArrangerTable);
+			dbDelta($sqlArrangerUserTable);
 			dbDelta($sqlMainTable);
 
 			$this->db->query("UPDATE " . $this->mainTable . " SET `eventLocation` = REPLACE(`eventLocation`,' ','');");
