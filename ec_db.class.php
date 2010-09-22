@@ -477,13 +477,15 @@ class EC_DB {
 	/**
 	 * Creates a specific category, must not exist before
 	 *
-	 * @param int $id
+	 * @param string $name
+	 * @return int The id of the inserted row
 	 */
 	function addCategory($name) {
 		$sql = "INSERT INTO `$this->categoryTable` "
 		     . "(name) "
 		     . "VALUES (%s);";
-		return $this->db->query($this->db->prepare($sql, $name));
+		$this->db->query($this->db->prepare($sql, $name));
+		return $this->db->insert_row;
 	}
 
 	/**
@@ -562,14 +564,16 @@ class EC_DB {
 	/**
 	 * Creates a specific location, must not exist before
 	 *
-	 * @param int $id
+	 * @param string $name
+	 * @param string $description
 	 * @return int number of rows acted upon
 	 */
 	function addLocation($name, $description = null) {
 		$sql = "INSERT INTO `$this->locationTable` "
 		     . "(name, description) "
 		     . "VALUES (%s, %s);";
-		return $this->db->query($this->db->prepare($sql, $name, $description));
+		$this->db->query($this->db->prepare($sql, $name, $description));
+		return $this->db->insert_id;
 	}
 
 	/**
