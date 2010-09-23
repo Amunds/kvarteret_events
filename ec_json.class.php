@@ -143,7 +143,6 @@ class EC_JSON {
 		$list = $this->db->getLocationList();
 
 		if ($echo) {
-			print_r($list);
 			echo json_encode($list);
 		} else {
 			return $list;
@@ -154,7 +153,6 @@ class EC_JSON {
 		$list = $this->db->getCategoryList();
 
 		if ($echo) {
-			print_r($list);
 			echo json_encode($list);
 		} else {
 			return $list;
@@ -165,7 +163,6 @@ class EC_JSON {
 		$list = $this->db->getArrangerList();
 
 		if ($echo) {
-			print_r($list);
 			echo json_encode($list);
 		} else {
 			return $list;
