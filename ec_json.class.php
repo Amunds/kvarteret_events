@@ -77,6 +77,25 @@ class EC_JSON {
 		}
 	}
 
+	/**
+	 * Will return a associative array of a specified
+	 * error message and error code
+	 *
+	 * @param string $msg Message
+	 * @param int $code Error code
+	 * @return array
+	 */
+	private function error ($msg, $code) {
+		$arr = array(
+			'error' => array(
+				'code' => intval($code),
+				'msg' => strval($msg),
+			),
+		);
+
+		return $arr;
+	}
+
 	private function prepareEvent ($event) {
 		if ($event->arrangerId > 0) {
 			$tmp = $this->db->getArranger($event->arrangerId);
