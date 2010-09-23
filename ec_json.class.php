@@ -271,6 +271,15 @@ class EC_JSON {
 		 */
 
 		if (!isset($_POST['EC_name']) || !isset($_POST['EC_description'])) {
+			echo json_encode($this->error("To add a location you must specify EC_name and EC_description", 1));
+			return False;
+		}
+
+		$_POST['EC_name'] = trim($_POST['EC_name']);
+		$_POST['EC_description'] = trim($_POST['EC_description']);
+
+		if (empty($_POST['EC_name'])) {
+			echo json_encode($this->error("To add a location you must specify EC_name and EC_description, EC_name can not be empty", 1));
 			return False;
 		}
 
@@ -283,6 +292,14 @@ class EC_JSON {
 		 */
 
 		if (!isset($_POST['EC_name'])) {
+			echo json_encode($this->error("To add a category you must specify non-empty EC_name", 2));
+			return False;
+		}
+
+		$_POST['EC_name'] = trim($_POST['EC_name']);
+
+		if (empty($_POST['EC_name'])) {
+			echo json_encode($this->error("To add a category you must specify a non-empty EC_name", 2));
 			return False;
 		}
 
@@ -291,14 +308,24 @@ class EC_JSON {
 
 	private function addArranger () {
 		/**
-		 * Demands that $_POST['EC_name'] and $_POST['EC_description'] be set
+		 * Demands that $_POST['EC_name'] and $_POST['EC_description'] and $_POST['EC_url'] be set
 		 */
 
-		if (!isset($_POST['EC_name']) || !isset($_POST['EC_description'])) {
+		if (!isset($_POST['EC_name']) || !isset($_POST['EC_description']) || !isset($_POST['EC_url'])) {
+			echo json_encode($this->error("To add an arranger you must specify EC_name, EC_description and EC_url, EC_name can not be empty", 3));
 			return False;
 		}
 
-		$res = $this->db->addArranger (strval($_POST['EC_name']), strval($_POST['EC_description']));
+		$_POST['EC_name'] = trim($_POST['EC_name']);
+		$_POST['EC_description'] = trim($_POST['EC_description']);
+		$_POST['EC_url'] = trim($_POST['EC_url']);
+
+		if (empty($_POST['EC_name'])) {
+			echo json_encode($this->error("To add an arranger you must specify EC_name, EC_description and EC_url, EC_name can not be empty", 3));
+			return False;
+		}
+
+		$res = $this->db->addArranger (strval($_POST['EC_name']), strval($_POST['EC_description']), strval($_POST['EC_url']));
 	}
 }
 
