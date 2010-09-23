@@ -169,6 +169,10 @@ class EC_JSON {
 		}
 	}
 
+	/**
+	 * Prints a list of upcoming events
+	 * A default limit of 10 is set
+	 */
 	private function getUpcomingEvents () {
 		$limit = 10;
 		if (isset($_GET['EC_limit'])) {
@@ -184,6 +188,12 @@ class EC_JSON {
 		echo json_encode($events);
 	}
 
+	/**
+	 * Prints a list of filtered events, based on the setting of
+	 * non-mandatory query variables EC_startDate, EC_endDate,
+	 * EC_locationId, EC_categoryId, EC_arrangerId, EC_limit,
+	 * EC_offset
+	 */
 	private function getFilteredEventList () {
 		$krav = array();
 
