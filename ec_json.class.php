@@ -14,6 +14,7 @@ class EC_JSON {
 	private $db;
 
 	private $nonPrivilegeFunctions = array();
+	private $arrangerFunctions = array();
 	private $administratorFunctions = array();
 
 	private $userData;
