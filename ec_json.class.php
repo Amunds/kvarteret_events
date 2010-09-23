@@ -229,7 +229,7 @@ class EC_JSON {
 			$offset = intval($_GET['EC_offset']);
 		}
 
-		$events = $this->db->getFilteredEventList($krav, $limit, $offset)
+		$events = $this->db->getFilteredEventList($krav, $limit, $offset);
 
 		foreach ($events as &$event) {
 			$event = $this->prepareEvent($event);
