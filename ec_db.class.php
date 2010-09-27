@@ -485,7 +485,7 @@ class EC_DB {
 		     . "(name) "
 		     . "VALUES (%s);";
 		$this->db->query($this->db->prepare($sql, $name));
-		return $this->db->insert_row;
+		return $this->db->insert_id;
 	}
 
 	/**
