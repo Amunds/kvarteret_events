@@ -507,8 +507,8 @@ class EC_DB {
 		$count = $this->db->get_var($this->db->prepare($sql, $newName, $id));
 
 		if ($count == 0) {
-			$sql = "UPDATE`$this->categoryTable` "
-			     . "SET name = %s "
+			$sql = "UPDATE `$this->categoryTable` SET "
+			     . "name = %s "
 			     . "WHERE id = %d;";
 
 			return $this->db->query($this->db->prepare($sql, $newName, $id));
@@ -594,9 +594,9 @@ class EC_DB {
 		$count = $this->db->get_var($this->db->prepare($sql, $newName, $id));
 
 		if ($count == 0) {
-			$sql = "UPDATE `$this->locationTable` "
-			     . "SET name = %s, "
-			     . "SET description = %s"
+			$sql = "UPDATE `$this->locationTable` SET "
+			     . "name = %s, "
+			     . "description = %s "
 			     . "WHERE id = %d;";
 
 			return $this->db->query($this->db->prepare($sql, $newName, $newDescription, $id));
@@ -685,11 +685,11 @@ class EC_DB {
 		$count = $this->db->get_var($this->db->prepare($sql, $newName, $id));
 
 		if ($count == 0) {
-			$sql = "UPDATE `$this->arrangerTable` "
-			     . "SET name = %s, "
-			     . "SET description = %s, "
-			     . "SET url = %s "
-			     . "WHERE id = %d;";
+			$sql = "UPDATE `$this->arrangerTable` SET "
+			     . "name = %s, "
+			     . "description = %s, "
+			     . "url = %s "
+			     . "WHERE id = %d";
 
 			return $this->db->query($this->db->prepare($sql, $newName, $newDescription, $newUrl, $id));
 		} else {
