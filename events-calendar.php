@@ -79,6 +79,14 @@ require_once(EVENTSCALENDARCLASSPATH.DS.'ec_management.class.php');
 require_once(EVENTSCALENDARCLASSPATH.DS.'ec_json.class.php');
 require_once(ABSPATH.'wp-includes/pluggable.php');
 
+/**
+ * $_GET['EC_json']
+ */
+if (isset($_GET['EC_json'])) {
+	$json = new EC_JSON();
+	exit();
+}
+
 /** Init Localisation */
 load_default_textdomain();
 /* removed and moved for 6.6.1 patch by Byron */
@@ -129,14 +137,6 @@ if(isset($_GET['EC_action']) && $_GET['EC_action'] == 'ajaxDelete') {
   $db = new EC_DB();
   $db->deleteEvent($_GET['EC_id']);
   exit();
-}
-
-/**
- * $_GET['EC_json']
- */
-if (isset($_GET['EC_json'])) {
-	$json = new EC_JSON();
-	exit();
 }
 
 /**
