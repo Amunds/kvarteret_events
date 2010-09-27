@@ -503,7 +503,7 @@ class EC_DB {
 		}
 
 		$sql = "SELECT COUNT(*) FROM `$this->categoryTable` "
-		     . "WHERE name = %s";
+		     . "WHERE name = %s AND id != %d";
 		$count = $this->db->get_var($this->db->prepare($sql, $newName, $id));
 
 		if ($count == 0) {
@@ -590,7 +590,7 @@ class EC_DB {
 		}
 
 		$sql = "SELECT COUNT(*) FROM `$this->locationTable` "
-		     . "WHERE name = %s";
+		     . "WHERE name = %s AND id != %d";
 		$count = $this->db->get_var($this->db->prepare($sql, $newName, $id));
 
 		if ($count == 0) {
@@ -681,7 +681,7 @@ class EC_DB {
 		}
 
 		$sql = "SELECT COUNT(*) FROM `$this->arrangerTable` "
-		     . "WHERE name = %s";
+		     . "WHERE name = %s AND id != %d";
 		$count = $this->db->get_var($this->db->prepare($sql, $newName, $id));
 
 		if ($count == 0) {
