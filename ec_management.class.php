@@ -89,10 +89,23 @@ class EC_Management {
 	 */
 	var $db;
 
+	var $userData;
+
+	var $locationList;
+	var $arrangerList;
+	var $categoryList;
+
   /**
 	* Constructor.
 	*/
 	function EC_Management() {
+		global $user_ID;
+		get_currentuserinfo();
+
+		if ($user_ID != '') {
+			$this->userData = new WP_User($user_ID);
+		}
+
 		$this->month = date('m');
 		$this->year = date('Y');
 		
@@ -104,6 +117,27 @@ class EC_Management {
 		$this->deflinkout = "http://";
 		$this->calendar = new EC_Calendar();
 		$this->db = new EC_DB();
+
+		$this->locationList = $this->db->getLocationList();
+		$this->categoryList = $this->db->getCategoryList();
+
+		if (isset($this->userData)) {
+			if ( in_array('administrator', $this->userData->roles) ||
+			     in_array('editor', $this->userData->roles) ) {
+				$this->arrangerList = $this->db->getArrangerList();
+			} else {
+				// Will only use arrangers the user is connected to
+				$userArranger = $this->db->getArrangerUserRelation($this->userData->ID, 'user');
+				$arrangers = array();
+
+				foreach ($userArranger as $u) {
+					$arr = $this->db->getArranger($u->arrangerId);
+					$arrangers[] = $arr[0];
+				}
+
+				$this->arrangerList = $arrangers;
+			}
+		}
 	}
 
 	/**
