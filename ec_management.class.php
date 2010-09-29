@@ -1197,6 +1197,63 @@ EOT;
 			$this->categoryForm('add');
 		}
 	}
+
+	function manageUserArranger () {
+		global $wpdb;
+		// Will deal with connections between users and arrangers
+		$baseUrl = 'page=events-calendar-userarranger';
+
+		if (!empty($_GET['EC_do']) && ($_GET['EC_do'] == 'add')) {
+			$arrangerUserRel = $this->db->getArrangerUserRelation($_GET['EC_arrangerId'], 'arranger');
+			if (isset($_GET['EC_submit']) && ($_GET['EC_submit'] == 1)) {
+				$res = $this->db->addArrangerUser($_GET['EC_arrangerId'], $_POST['EC_userId']);
+				echo intval($res);
+
+				echo "<a href='?{$baseUrl}'>Return to list.</a>";
+			} else {
+				$arranger = $this->arrangerList[$_GET['EC_arrangerId']];
+				echo "<p>Add user to arranger <i>{$arranger->name}</i>?</p>\n";
+				echo "<form action='?{$baseUrl}&amp;EC_do=add&amp;EC_submit=1&amp;EC_arrangerId={$_GET['EC_arrangerId']}' method='post'>\n";
+
+				$allUsers = $wpdb->get_col( "SELECT `$wpdb->users`.ID FROM `$wpdb->users` ORDER BY user_nicename ASC" );
+				foreach ($allUsers as $u) {
+					$user = get_userdata($u);
+					echo "<label><input type='radio' name='EC_userId' value='$u'/> $user->user_login <i>$user->first_name $user->last_name</i></label><br/>\n";
+				}
+
+				echo "<input type='submit' value='Add'/>\n";
+				echo "</form>\n";
+				echo "<a href='?{$baseUrl}'>Return to list</a>\n";
+			}
+		} else if (!empty($_GET['EC_do']) && ($_GET['EC_do'] == 'delete')) {
+			$res = $this->db->deleteArrangerUser($_GET['EC_arrangerId'], $_GET['EC_userId']);
+			echo intval($res);
+			echo "<a href='?{$baseUrl}'>Return to list</a>";
+		} else {
+
+			// We'll sort by arrangers
+			$arrangerList = $this->db->getArrangerList();
+
+			foreach ($arrangerList as $a) {
+				$connections = $this->db->getArrangerUserRelation($a->id, 'arranger');
+
+				echo "<div>\n";
+				echo "<p><b>{$a->name}</b> <a href='?{$baseUrl}&amp;EC_do=add&amp;EC_arrangerId={$a->id}'>Add user to arranger</a></p>\n";
+				if (count($connections) == 0) {
+					echo "<p>No users connected.</p>\n";
+				} else {
+					echo "<ul>\n";
+					foreach ($connections as $c) {
+						$user = get_userdata($c->userId);
+						echo "<li>{$user->user_login} <small><a href='?{$baseUrl}&amp;EC_do=delete&amp;EC_arrangerId={$a->id}&amp;EC_userId={$c->userId}'>Delete</a></small></li>\n";
+					}
+					echo "</ul>\n";
+				}
+
+				echo "</div>\n";
+			}
+		}
+	}
 }
 endif;
 ?>
