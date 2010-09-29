@@ -1102,6 +1102,101 @@ EOT;
 			$this->arrangerForm('add');
 		}
 	}
+
+	public function categoryForm ($type = 'add', $id = null) {
+		$name = '';
+		$urlExtra = "";
+
+		if ($type == 'add') {
+			$urlExtra .= "&amp;EC_do=add";
+			$button = 'Add';
+		} else if ($type == 'edit') {
+			$category = $this->db->getCategory($id);
+			$name = $category[0]->name;
+			$urlExtra .= "&amp;EC_do=edit&amp;EC_categoryId=" . $id;
+			$button = 'Update';
+		}
+
+		echo <<<EOT
+<form method="post" action="?page=events-calendar-categories{$urlExtra}&amp;EC_submit=1">
+ <table>
+  <tr>
+   <td><label for="EC_categoryName">Name</label></td>
+   <td><input type="text" name="EC_categoryName" id="EC_categoryName" value="{$name}"/></td>
+  </tr>
+ </table>
+ <input type="submit" value="{$button}"/>
+</form>
+EOT;
+	}
+
+	public function manageCategories () {
+		// This function will either display, edit, delete or add new categories
+		// It will only be initiated when ?page=events-calendar-categories is present
+
+		$baseUrl = 'page=events-calendar-categories';
+
+		if (isset($_GET['EC_do']) && ($_GET['EC_do'] == 'edit')) {
+			// Will edit a category
+
+			if (isset($_GET['EC_submit']) && ($_GET['EC_submit'] == 1)) {
+				$success = $this->db->editCategory($_GET['EC_categoryId'], $_POST['EC_categoryName']);
+
+				echo intval($success) . "\n";
+				if ($success) {
+					echo "<p>The category update went well. <a href='?{$baseUrl}'>Return to the list</a></p>";
+				} else {
+					echo "<p>The category update did not go well. <a href='?{$baseUrl}'>Return to the list</a></p>";
+				}
+			} else {
+				$this->categoryForm('edit', intval($_GET['EC_categoryId']));
+			}
+		} else if (isset($_GET['EC_do'])  && ($_GET['EC_do'] == 'delete')) {
+			// Will delete a category
+
+			if (isset($_GET['EC_submit']) && ($_GET['EC_submit'] == 1)) {
+				$this->db->deleteCategory($_GET['EC_categoryId']);
+				echo "<p>The category <i>{$this->categoryList[$_GET['EC_categoryId']]->name}</i> were removed. <a href='?{$baseUrl}'>Return to the category list</a></p>";
+			} else {
+				echo "<p>Are you sure you want to delete the category <i>{$this->categoryList[$_GET['EC_categoryId']]->name}</i>?</p>";
+				echo "<p><a href='?{$baseUrl}&amp;EC_do=delete&amp;EC_categoryId={$_GET['EC_categoryId']}&amp;EC_submit=1'>Yes</a> <a href='?{$baseUrl}'>No</a></p>";
+			}
+		} else if (isset($_GET['EC_do'])  && ($_GET['EC_do'] == 'add')) {
+			// Will add a category
+
+			if (isset($_GET['EC_submit']) && ($_GET['EC_submit'] == 1)) {
+				$res = $this->db->addCategory($_POST['EC_categoryName']);
+
+				if ($res > 0) {
+					echo "<p>The category were successfully added. <a href='?{$baseUrl}'>Return to list</a></p>";
+				} else {
+					echo "<p>The category were not successfully added. <a href='?{$baseUrl}'>Return to list</a></p>";
+				}
+			} else {
+				$this->categoryForm('add');
+			}
+		} else {
+			// Default action is to list all categories
+
+			echo "<table>\n";
+			echo " <tr>\n";
+			echo "  <td>Name</td>\n";
+			echo "  <td>Actions</td>\n";
+			echo " </tr>\n";
+
+			foreach ($this->categoryList as $l) {
+				echo "<tr>\n";
+				echo "<td>" . $l->name . "</td>\n";
+				echo "<td><a href='?{$baseUrl}&amp;EC_do=edit&amp;EC_categoryId={$l->id}'>Edit</a> <a href='?{$baseUrl}&amp;EC_do=delete&amp;EC_categoryId={$l->id}'>Delete</a></td>\n";
+				echo "</tr>\n";
+			}
+
+			echo "</table>\n";
+
+			echo "<b>Add new category</b>\n";
+			$this->categoryForm('add');
+		}
+	}
 }
 endif;
 ?>
