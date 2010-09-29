@@ -990,6 +990,118 @@ EOT;
 			$this->locationForm('add');
 		}
 	}
+
+	public function arrangerForm ($type = 'add', $id = null) {
+		$name = '';
+		$description = '';
+		$url = '';
+		$urlExtra = "";
+
+		if ($type == 'add') {
+			$urlExtra .= "&amp;EC_do=add";
+			$button = 'Add';
+		} else if ($type == 'edit') {
+			$arranger = $this->db->getArranger($id);
+			$name = $arranger[0]->name;
+			$description = $arranger[0]->description;
+			$url = $arranger[0]->url;
+			$urlExtra .= "&amp;EC_do=edit&amp;EC_arrangerId=" . $id;
+			$button = 'Update';
+		}
+
+		echo <<<EOT
+<form method="post" action="?page=events-calendar-arrangers{$urlExtra}&amp;EC_submit=1">
+ <table>
+  <tr>
+   <td><label for="EC_arrangerName">Name</label></td>
+   <td><input type="text" name="EC_arrangerName" id="EC_arrangerName" value="{$name}"/></td>
+  </tr>
+  <tr>
+   <td><label for="EC_arrangerDescription">Description</label></td>
+   <td><textarea cols="50" rows="7" name="EC_arrangerDescription" id="EC_arrangerDescription">{$description}</textarea></td>
+  </tr>
+  <tr>
+   <td><label for="EC_arrangerUrl">Url</label></td>
+   <td><input type="text" name="EC_arrangerUrl" id="EC_arrangerUrl" value="{$url}"/></td>
+  </tr>
+ </table>
+ <input type="submit" value="{$button}"/>
+</form>
+EOT;
+	}
+
+	public function manageArrangers () {
+		// This function will either display, edit, delete or add new categories
+		// It will only be initiated when ?page=events-calendar-arrangers is present
+
+		$baseUrl = 'page=events-calendar-arrangers';
+
+		if (isset($_GET['EC_do']) && ($_GET['EC_do'] == 'edit')) {
+			// Will edit an arrangers
+
+			if (isset($_GET['EC_submit']) && ($_GET['EC_submit'] == 1)) {
+				$success = $this->db->editArranger($_GET['EC_arrangerId'], $_POST['EC_arrangerName'], $_POST['EC_arrangerDescription'], $_POST['EC_arrangerUrl']);
+
+				echo intval($success) . "\n";
+				if ($success) {
+					echo "<p>The arranger update went well. <a href='?{$baseUrl}'>Return to the list</a></p>";
+				} else {
+					echo "<p>The arranger update did not go well. <a href='?{$baseUrl}'>Return to the list</a></p>";
+				}
+			} else {
+				$this->arrangerForm('edit', intval($_GET['EC_arrangerId']));
+			}
+		} else if (isset($_GET['EC_do'])  && ($_GET['EC_do'] == 'delete')) {
+			// Will delete an arranger
+
+			$arrangerDesc = $this->arrangerList[$_GET['EC_arrangerId']]->name;
+
+			if (isset($_GET['EC_submit']) && ($_GET['EC_submit'] == 1)) {
+				$this->db->deleteArranger($_GET['EC_arrangerId']);
+				echo "<p>The category <i>{$arrangerDesc}</i> were removed. <a href='?{$baseUrl}'>Return to the arranger list</a></p>";
+			} else {
+				echo "<p>Are you sure you want to delete the arranger <i>{$arrangerDesc}</i>?</p>";
+				echo "<p><a href='?{$baseUrl}&amp;EC_do=delete&amp;EC_arrangerId={$_GET['EC_arrangerId']}&amp;EC_submit=1'>Yes</a> <a href='?{$baseUrl}'>No</a></p>";
+			}
+		} else if (isset($_GET['EC_do'])  && ($_GET['EC_do'] == 'add')) {
+			// Will add an arranger
+
+			if (isset($_GET['EC_submit']) && ($_GET['EC_submit'] == 1)) {
+				$res = $this->db->addArranger($_POST['EC_arrangerName'], $_POST['EC_arrangerDescription'], $_POST['EC_arrangerUrl']);
+				if ($res > 0) {
+					echo "<p>The arranger were successfully added. <a href='?{$baseUrl}'>Return to list</a></p>";
+				} else {
+					echo "<p>The arranger were not successfully added. <a href='?{$baseUrl}'>Return to list</a></p>";
+				}
+			} else {
+				$this->arrangerForm('add');
+			}
+		} else {
+			// Default action is to list all arrangers
+
+			echo "<table>\n";
+			echo " <tr>\n";
+			echo "  <td>Name</td>\n";
+			echo "  <td>Description</td>\n";
+			echo "  <td>Url</td>\n";
+			echo "  <td>Actions</td>\n";
+			echo " </tr>\n";
+
+			foreach ($this->arrangerList as $l) {
+				echo "<tr>\n";
+				echo "<td>" . $l->name . "</td>\n";
+				echo "<td>" . $l->description . "</td>\n";
+				echo "<td>" . $l->url . "</td>\n";
+				echo "<td><a href='?{$baseUrl}&amp;EC_do=edit&amp;EC_arrangerId={$l->id}'>Edit</a> <a href='?{$baseUrl}&amp;EC_do=delete&amp;EC_arrangerId={$l->id}'>Delete</a></td>\n";
+				echo "</tr>\n";
+			}
+
+			echo "</table>\n";
+
+			echo "<b>Add new arranger</b>\n";
+			$this->arrangerForm('add');
+		}
+	}
 }
 endif;
 ?>
