@@ -155,11 +155,18 @@ class EC_Management {
 		if(isset($_POST['EC_addEventFormSubmitted'])) {
 			// all the strings are escaped. 
 			$title = $wpdb->escape($_POST['EC_title']);
-			$location = isset($_POST['EC_location']) && !empty($_POST['EC_location']) ? $wpdb->escape($_POST['EC_location']) : null;
+
+			if ($_POST['EC_locationId'] > 0) {
+				// We prefer locationIds over textual locations
+				$location = intval($_POST['EC_locationId']);
+			} else {
+				$location = strval($_POST['EC_location']);
+			}
+
 			$linkout = isset($_POST['EC_linkout']) && !empty($_POST['EC_linkout']) && ($_POST['EC_linkout'] != $this->deflinkout) ? $wpdb->escape($_POST['EC_linkout']) : null;
 			$description = $wpdb->escape($_POST['EC_description']);
-      $categoryId = isset($_POST['EC_categoryId']) && !empty($_POST['EC_categoryId'])? $_POST['EC_categoryId'] : null;
-      $locationId = isset($_POST['EC_locationId']) && !empty($_POST['EC_locationId'])? $_POST['EC_locationId'] : null;
+			$categoryId = isset($_POST['EC_categoryId']) && !empty($_POST['EC_categoryId'])? $_POST['EC_categoryId'] : null;
+			$arrangerId = isset($_POST['EC_arrangerId']) && !empty($_POST['EC_arrangerId'])? $_POST['EC_arrangerId'] : null;
 			$startDate = isset($_POST['EC_startDate']) && !empty($_POST['EC_startDate'])? $_POST['EC_startDate'] : date('Y-m-d');
 			$startTime = isset($_POST['EC_startTime']) && !empty($_POST['EC_startTime']) ? $_POST['EC_startTime'] : null;
 			$endDate = isset($_POST['EC_endDate']) && !empty($_POST['EC_endDate']) ? $_POST['EC_endDate'] : $startDate;
@@ -212,7 +219,7 @@ class EC_Management {
 			  $postID = $results[0]->id;
 			}
 
-			$this->addEvent($title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId, $locationId);
+			$this->addEvent($title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId, $arrangerId);
 
 			$splitDate = split("-", $startDate);
 			$this->month = $splitDate[1];
@@ -234,11 +241,18 @@ class EC_Management {
 			 */
 			
 			$title = $_POST['EC_title'];
-			$location = isset($_POST['EC_location']) && !empty($_POST['EC_location']) ? $_POST['EC_location'] : null;
+
+			if ($_POST['EC_locationId'] > 0) {
+				// We prefer locationIds over textual locations
+				$location = intval($_POST['EC_locationId']);
+			} else {
+				$location = strval($_POST['EC_location']);
+			}
+
 			$linkout = isset($_POST['EC_linkout']) && !empty($_POST['EC_linkout']) && ($_POST['EC_linkout'] != $this->deflinkout) ? $_POST['EC_linkout'] : null;
 			$description = $_POST['EC_description'];
 			$categoryId = $_POST['EC_categoryId'];
-			$locationId = $_POST['EC_locationId'];
+			$arrangerId = $_POST['EC_arrangerId'];
 
 			$startDate = isset($_POST['EC_startDate']) && !empty($_POST['EC_startDate'])? $_POST['EC_startDate'] : date('Y-m-d');
 			$startTime = isset($_POST['EC_startTime']) && !empty($_POST['EC_startTime']) ? $_POST['EC_startTime'] : null;
@@ -247,7 +261,9 @@ class EC_Management {
 			$endTime = isset($_POST['EC_endTime']) && !empty($_POST['EC_endTime']) ? $_POST['EC_endTime'] : null;
 			$accessLevel = $_POST['EC_accessLevel'];
 			$postID = isset($_POST['EC_postID']) && !empty($_POST['EC_postID']) ? $_POST['EC_postID'] : null;
-			$this->editEvent($id, $title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId, $locationId);
+
+			$this->editEvent($id, $title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId, $arrangerId);
+
 			$splitDate = split("-", $startDate);
 			$this->month = $splitDate[1];
 			$this->year = $splitDate[0];
@@ -283,10 +299,10 @@ class EC_Management {
 	 * @param int    $accessLevel	who can access this event.
 	 * @param int    $postID	associated post id if available.
 	 * @param int 	 $categoryId 	event category, must be valid
-   * @param string or int	$location   the event location, either locationId or text
+	 * @param int 	 $arrangerId 	event arranger, must be valid
 	 */
-	function addEvent($title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId, $locationId) {
-		$this->db->addEvent($title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId, $locationId);
+	function addEvent($title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId, $arrangerId) {
+		$this->db->addEvent($title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId, $arrangerId);
 		return;
 	}
 
@@ -305,10 +321,10 @@ class EC_Management {
 	 * @param int    $accessLevel	who can access this event.
 	 * @param int    $postID	associated post id if available.
 	 * @param int 	 $categoryId 	event category, must be valid
-   * @param string or int	$location   the event location, either locationId or text
+	 * @param int 	 $arrangerId 	event arranger, must be valid
 	 */
-	function editEvent($id, $title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId, $locationId) {
-		$this->db->editEvent($id, addslashes($title), $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId, $locationId);
+	function editEvent($id, $title, $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId, $arrangerId) {
+		$this->db->editEvent($id, addslashes($title), $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId, $arrangerId);
 	}
 
 	/**
