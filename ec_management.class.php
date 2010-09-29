@@ -814,12 +814,12 @@ class EC_Management {
         <tr>
           <th width="33%" scope="row" valign="top" style="text-align:right;"><label for="EC_accessLevel"><?php _e('Access Level','events-calendar'); ?></label></th>
           <td width="67%">
-            <select name="EC_accessLevel" id="accessLevel">
-              <option value="level_10" <?php if($options['accessLevel'] == 'level_10') echo 'selected="selected"';?>><?php _e('Administrator','events-calendar'); ?></option>
-              <option value="level_7" <?php if($options['accessLevel'] == 'level_7') echo 'selected="selected"';?>><?php _e('Editor','events-calendar'); ?></option>
-              <option value="level_2" <?php if($options['accessLevel'] == 'level_2') echo 'selected="selected"';?>><?php _e('Author','events-calendar'); ?></option>
-              <option value="level_1" <?php if($options['accessLevel'] == 'level_1') echo 'selected="selected"';?>><?php _e('Contributor','events-calendar'); ?></option>
-              <option value="level_0" <?php if($options['accessLevel'] == 'level_0') echo 'selected="selected"';?>><?php _e('Subscriber','events-calendar'); ?></option>
+            <select name="EC_accessLevel" id="EC_accessLevel">
+              <option value="administrator" <?php if($options['accessLevel'] == 'administrator') echo 'selected="selected"';?>><?php _e('Administrator','events-calendar'); ?></option>
+              <option value="editor" <?php if($options['accessLevel'] == 'editor') echo 'selected="selected"';?>><?php _e('Editor','events-calendar'); ?></option>
+              <option value="author" <?php if($options['accessLevel'] == 'author') echo 'selected="selected"';?>><?php _e('Author','events-calendar'); ?></option>
+              <option value="contributor" <?php if($options['accessLevel'] == 'cintributor') echo 'selected="selected"';?>><?php _e('Contributor','events-calendar'); ?></option>
+              <option value="subscriber" <?php if($options['accessLevel'] == 'subscriber') echo 'selected="selected"';?>><?php _e('Subscriber','events-calendar'); ?></option>
             </select>
           </td>
         </tr>

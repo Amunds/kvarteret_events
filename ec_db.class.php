@@ -326,7 +326,7 @@ class EC_DB {
 		if (!isset($options['dayHasEventCSS'])) $options['dayHasEventCSS'] = 'color:red;';
 		if (!isset($options['daynamelength'])) $options['daynamelength'] = '3';
 		if (!isset($options['daynamelengthLarge'])) $options['daynamelengthLarge'] = '3';
-		if (!isset($options['accessLevel'])) $options['accessLevel'] = 'level_10';
+		if (!isset($options['accessLevel'])) $options['accessLevel'] = 'administrator';
 		update_option('optionsEventsCalendar', $options);
 
 		$widget_options = get_option('widgetEventsCalendar');
