@@ -886,6 +886,110 @@ class EC_Management {
     </script>
 <?php
   }
+
+	public function locationForm ($type = 'add', $id = null) {
+		$name = '';
+		$description = '';
+		$urlExtra = "";
+
+		if ($type == 'add') {
+			$urlExtra .= "&amp;EC_do=add";
+			$button = 'Add';
+		} else if ($type == 'edit') {
+			$location = $this->db->getLocation($id);
+			$name = $location[0]->name;
+			$description = $location[0]->description;
+			$urlExtra .= "&amp;EC_do=edit&amp;EC_locationId=" . $id;
+			$button = 'Update';
+		}
+
+		echo <<<EOT
+<form method="post" action="?page=events-calendar-locations{$urlExtra}&amp;EC_submit=1">
+ <table>
+  <tr>
+   <td><label for="EC_locationName">Name</label></td>
+   <td><input type="text" name="EC_locationName" id="EC_locationName" value="{$name}"/></td>
+  </tr>
+  <tr>
+   <td><label for="EC_locationDescription">Description</label></td>
+   <td><textarea cols="50" rows="7" name="EC_locationDescription" id="EC_locationDescription">{$description}</textarea></td>
+  </tr>
+ </table>
+ <input type="submit" value="{$button}"/>
+</form>
+EOT;
+	}
+
+	public function manageLocations () {
+		// This function will either display, edit, delete or add new locations
+		// It will only be initiated when ?page=events-calendar-locations is present
+
+		$baseUrl = 'page=events-calendar-locations';
+
+		if (isset($_GET['EC_do']) && ($_GET['EC_do'] == 'edit')) {
+			// Will edit a location
+
+			if (isset($_GET['EC_submit']) && ($_GET['EC_submit'] == 1)) {
+				$success = $this->db->editLocation($_GET['EC_locationId'], $_POST['EC_locationName'], $_POST['EC_locationDescription']);
+
+				echo intval($success) . "\n";
+				if ($success) {
+					echo "<p>The location update went well. <a href='?{$baseUrl}'>Return to the list</a></p>";
+				} else {
+					echo "<p>The location update did not go well. <a href='?{$baseUrl}'>Return to the list</a></p>";
+				}
+			} else {
+				$this->locationForm('edit', intval($_GET['EC_locationId']));
+			}
+		} else if (isset($_GET['EC_do'])  && ($_GET['EC_do'] == 'delete')) {
+			// Will delete an location
+
+			$locationName = $this->locationList[$_GET['EC_locationId']]->name;
+
+			if (isset($_GET['EC_submit']) && ($_GET['EC_submit'] == 1)) {
+				$this->db->deleteLocation($_GET['EC_arrangerId']);
+				echo "<p>The location <i>{$locationName}</i> were removed. <a href='?{$baseUrl}'>Return to the arranger list</a></p>";
+			} else {
+				echo "<p>Are you sure you want to delete the location <i>{$locationName}</i>?</p>";
+				echo "<p><a href='?{$baseUrl}&amp;EC_do=delete&amp;EC_locationId={$_GET['EC_locationId']}&amp;EC_submit=1'>Yes</a> <a href='?{$baseUrl}'>No</a></p>";
+			}
+		} else if (isset($_GET['EC_do'])  && ($_GET['EC_do'] == 'add')) {
+			// Will add a location
+
+			if (isset($_GET['EC_submit']) && ($_GET['EC_submit'] == 1)) {
+				$res = $this->db->addLocation($_POST['EC_locationName'], $_POST['EC_locationDescription']);
+				if ($res > 0) {
+					echo "<p>The location were successfully added. <a href='?{$baseUrl}'>Return to list</a></p>";
+				} else {
+					echo "<p>The location were not successfully added. <a href='?{$baseUrl}'>Return to list</a></p>";
+				}
+			} else {
+				$this->locationForm('add');
+			}
+		} else {
+			// Default action is to list all locations
+
+			echo "<table>\n";
+			echo " <tr>\n";
+			echo "  <td>Name</td>\n";
+			echo "  <td>Description</td>\n";
+			echo "  <td>Actions</td>\n";
+			echo " </tr>\n";
+
+			foreach ($this->locationList as $l) {
+				echo "<tr>\n";
+				echo "<td>" . $l->name . "</td>\n";
+				echo "<td>" . $l->description . "</td>\n";
+				echo "<td><a href='?{$baseUrl}&amp;EC_do=edit&amp;EC_locationId={$l->id}'>Edit</a> <a href='?{$baseUrl}&amp;EC_do=delete&amp;EC_locationId={$l->id}'>Delete</a></td>\n";
+				echo "</tr>\n";
+			}
+
+			echo "</table>\n";
+
+			echo "<b>Add new location</b>\n";
+			$this->locationForm('add');
+		}
+	}
 }
 endif;
 ?>
