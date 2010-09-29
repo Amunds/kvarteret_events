@@ -205,10 +205,29 @@ function EC_send_headers() {
  * 		needs to be investigated. No sense loading an unneeded script!
  */
 function EventsCalendarManagementINIT() {
-	$options = get_option('optionsEventsCalendar');
-	$EC_userLevel = isset($options['accessLevel']) && !empty($options['accessLevel']) ? $options['accessLevel'] : 'level_10';
+	global $user_ID;
+	//$options = get_option('optionsEventsCalendar');
+	//$EC_userLevel = isset($options['accessLevel']) && !empty($options['accessLevel']) ? $options['accessLevel'] : 'administrator';
+
+	// We hard configure adminlevel to the editor role, generally they are the ones to moderate comments on articles.
+	$EC_adminLevel = 'moderate_comments';
+	$EC_accessLevel = $EC_adminLevel;
+	$db = new EC_DB();
+
+	$userData = new WP_User($user_ID);
+
+	if (!current_user_can($EC_adminLevel)) {
+		if (count($db->getArrangerUserRelation($user_ID, 'user')) > 0) {
+			// If the user has any connections to arrangers we set 
+			// the access level to read.
+			$EC_accessLevel = 'read';
+		} else {
+			return False;
+		}
+	}
+
 	$management = new EC_Management();
-	add_menu_page(__('Events Calendar','events-calendar'), __('Events Calendar','events-calendar'), $EC_userLevel, 'events-calendar', array(&$management, 'display'));
+	add_menu_page(__('Events Calendar','events-calendar'), __('Events Calendar','events-calendar'), $EC_accessLevel, 'events-calendar', array(&$management, 'display'));
 	if(isset($_GET['page']) && strstr($_GET['page'], 'events-calendar')) {
 		global $loc_lang;
     	wp_enqueue_script('jquerybgiframe', '/wp-content/plugins/events-calendar/js/jquery.bgiframe.js', array('jquery'), '2.1');
@@ -216,17 +235,21 @@ function EventsCalendarManagementINIT() {
 		  wp_enqueue_script('jquerytooltip', '/wp-content/plugins/events-calendar/js/jquery.tooltip.min.js', array('jquery'), '1.3');
     	wp_enqueue_script('jqueryuicore', '/wp-content/plugins/events-calendar/js/ui.core.min.js', array('jquery'), '1.8.4');
     	wp_enqueue_script('eventapplication', '/wp-content/plugins/events-calendar/js/event_application.js', array('jquery'), '0.1');
-		
+
 		if ($loc_lang != 'en')
 			wp_enqueue_script('jqueryuidatepickerlang', '/wp-content/plugins/events-calendar/js/i18n/ui.datepicker-'.$loc_lang.'.js', array('jquery'), '1.5.2');
-		
+
 		wp_enqueue_script('jqueryclockpicker', '/wp-content/plugins/events-calendar/js/jquery.clockpick.min.js', array('jquery'), '1.2.6');
 //		add_submenu_page('events-calendar', __('Events Calendar','events-calendar'), __('Calendar','events-calendar'), $EC_userLevel, 'events-calendar', array(&$management, 'calendarOptions'));
 
-		add_submenu_page('events-calendar', __('Events Calendar','events-calendar'), __('Calendar','events-calendar'), $EC_userLevel, 'events-calendar', '');
+		add_submenu_page('events-calendar', __('Events Calendar','events-calendar'), __('Calendar','events-calendar'), $EC_accessLevel, 'events-calendar', '');
+		add_submenu_page('events-calendar', __('Events Calendar','events-calendar'), __('Add Event','events-calendar'), $EC_accessLevel, '#addEventform', '');
 
-		add_submenu_page('events-calendar', __('Events Calendar','events-calendar'), __('Add Event','events-calendar'), $EC_userLevel, '#addEventform', '');
-		add_submenu_page('events-calendar', __('Events Calendar Options','events-calendar'), __('Options','events-calendar'), $EC_userLevel, 'events-calendar-options', array(&$management, 'calendarOptions'));
+		add_submenu_page('events-calendar', __('Events Calendar Options','events-calendar'), __('Options','events-calendar'), $EC_adminLevel, 'events-calendar-options', array(&$management, 'calendarOptions'));
+		add_submenu_page('events-calendar', __('Events Calendar Locations','events-calendar'), __('Locations','events-calendar'), $EC_adminLevel, 'events-calendar-locations', array(&$management, 'manageLocations'));
+		add_submenu_page('events-calendar', __('Events Calendar Arrangers','events-calendar'), __('Arrangers','events-calendar'), $EC_adminLevel, 'events-calendar-arrangers', array(&$management, 'manageArrangers'));
+		add_submenu_page('events-calendar', __('Events Calendar Users connected to arrangers','events-calendar'), __('Users connected to arrangers','events-calendar'), $EC_adminLevel, 'events-calendar-userarranger', array(&$management, 'manageUserArranger'));
+		add_submenu_page('events-calendar', __('Events Calendar Categories','events-calendar'), __('Categories','events-calendar'), $EC_adminLevel, 'events-calendar-categories', array(&$management, 'manageCategories'));
 	}
 }
 
