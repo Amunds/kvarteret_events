@@ -327,6 +327,22 @@ class EC_Management {
 		$this->db->editEvent($id, addslashes($title), $location, $linkout, $description, $startDate, $startTime, $endDate, $endTime, $accessLevel, $postID, $categoryId, $arrangerId);
 	}
 
+	function makeSelectOption ($arrObj, $valueKey, $descKey, $selectedValue = null) {
+		$select = "";
+
+		if (count($this->locationList) > 0) {
+			foreach ($arrObj as $o) {
+				if (isset($selectedValue) && ($o->$valueKey == $selectedValue)) {
+					$select .= "<option value='" . $o->$valueKey . "' selected='selected'>" . $o->$descKey . "</option>\n";
+				} else {
+					$select .= "<option value='" . $o->$valueKey . "'>" . $o->$descKey . "</option>\n";
+				}
+			}
+		}
+
+		return $select;
+	}
+
 	/**
 	 * Outputs the Add Event form.
 	 *
