@@ -366,16 +366,34 @@ class EC_Management {
           <td><input class="ec-edit-form-text" type="text" name="EC_title" id="EC_title" /></td>
         </tr>
         <tr>
-          <th scope="row"><label for="EC_categoryId"><?php _e('CategoryId','events-calendar'); ?></label></th>
-          <td><input class="ec-edit-form-text" type="text" name="EC_categoryId" id="EC_categoryId" /></td>
+          <th scope="row"><label for="EC_categoryId"><?php _e('Category','events-calendar'); ?></label></th>
+          <td>
+           <select name="EC_categoryId">
+            <?php echo $this->makeSelectOption($this->categoryList, 'id', 'name') ?>
+           </select>
+          </td>
         </tr>
         <tr>
-          <th scope="row"><label for="EC_locationId"><?php _e('LocationId','events-calendar'); ?></label></th>
-          <td><input class="ec-edit-form-text" type="text" name="EC_locationId" id="EC_locationId" /></td>
+          <th scope="row"><label for="EC_locationId"><?php _e('Location','events-calendar'); ?></label></th>
+          <td>
+           <select name="EC_locationId">
+            <option value='0'>Non-standard location</option>
+            <optgroup label='Recurring locations'>
+            <?php echo $this->makeSelectOption($this->locationList, 'id', 'name'); ?>
+            </optgroup>
+           </select>
+           <div id='EC_locationField'>
+            <input class="ec-edit-form-text" type="text" name="EC_location" id="EC_location" />
+           </div>
+          </td>
         </tr>
         <tr>
-          <th scope="row"><label for="location"><?php _e('Location','events-calendar'); ?></label></th>
-          <td><input class="ec-edit-form-text" type="text" name="EC_location" id="EC_location" /></td>
+          <th scope="row"><label for="EC_arrangerId"><?php _e('Arranger','events-calendar'); ?></label></th>
+          <td>
+           <select name="EC_arrangerId">
+            <?php echo $this->makeSelectOption($this->arrangerList, 'id', 'name'); ?>
+           </select>
+          </td>
         </tr>
         <tr>
           <th scope="row"><label for="linkout"><?php _e('Link out','events-calendar'); ?></label></th>
@@ -532,8 +550,34 @@ class EC_Management {
           <td><input class="ec-edit-form-text" type="text" name="EC_title" id="EC_title" value="<?php echo htmlentities(stripslashes($event->eventTitle),ENT_QUOTES);?>" /></td>
         </tr>
         <tr>
-          <th scope="row"><label for="location"><?php _e('Location','events-calendar'); ?></label></th>
-          <td><input class="ec-edit-form-text" type="text" name="EC_location" id="EC_location" value="<?php echo htmlentities(stripslashes($event->eventLocation),ENT_QUOTES);?>" /></td>
+          <th scope="row"><label for="EC_categoryId"><?php _e('Category','events-calendar'); ?></label></th>
+          <td>
+           <select name="EC_categoryId">
+            <?php echo $this->makeSelectOption($this->categoryList, 'id', 'name', $event->categoryId); ?>
+           </select>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row"><label for="EC_locationId"><?php _e('Location (pre-defined)','events-calendar'); ?></label></th>
+          <td>
+           <select name="EC_locationId">
+            <option value='0'>Non-standard location</option>
+            <optgroup label='Recurring locations'>
+            <?php echo $this->makeSelectOption($this->locationList, 'id', 'name', $event->locationId); ?>
+            </optgroup>
+           </select>
+           <div id='EC_locationField'>
+            <input class="ec-edit-form-text" type="text" name="EC_location" id="EC_location" value="<?php echo htmlentities(stripslashes($event->eventLocation),ENT_QUOTES);?>" />
+           </div>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row"><label for="EC_arrangerId"><?php _e('Arranger','events-calendar'); ?></label></th>
+          <td>
+           <select name="EC_arrangerId">
+            <?php echo $this->makeSelectOption($this->arrangerList, 'id', 'name', $event->arrangerId); ?>
+           </select>
+          </td>
         </tr>
         <tr>
           <th scope="row"><label for="linkout"><?php _e('Link out','events-calendar'); ?></label></th>
