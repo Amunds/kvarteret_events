@@ -116,7 +116,7 @@ class EC_JS {
 	 * @param int $month		month number
 	 * @param int $year 		year
 	 */
-	function calendarData($month, $year) {
+	function calendarData($month, $year, $filter = null) {
 		global $current_user;
 
 		// Localisation
@@ -141,11 +141,19 @@ class EC_JS {
 		$lastDay = date('t', mktime(0, 0, 0, $month, 1, $year));
 
 		for ($day = 1; $day <= $lastDay; $day++) {
-      	$sqldate = date('Y-m-d', mktime(0, 0, 0, $month, $day, $year));
-      	$output = '<ul class="EC-tt-widget-day-event">';
-			
+			$sqldate = date('Y-m-d', mktime(0, 0, 0, $month, $day, $year));
+			$output = '<ul class="EC-tt-widget-day-event">';
+
+			if (!empty($filter) && is_array($filter)) {
+				$filter['eventStartDate'] = array('date' => $sqldate, 'req' => '<=', 'nogroup' => true);
+				$filter['eventEndDate'] = array('date' => $sqldate, 'req' => '>=', 'nogroup' => true);
+				$events = $this->db->getFilteredEventList($filter);
+			} else {
+				$events = $this->db->getDaysEvents($sqldate);
+			}
+
 			// each day can have multiple events. So loop through them.
-			foreach ($this->db->getDaysEvents($sqldate) as $e) {
+			foreach ($events as $e) {
 
 				if (($e->accessLevel == 'public') || (current_user_can($e->accessLevel))) {
 					$title = $e->eventTitle;

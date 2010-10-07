@@ -113,7 +113,7 @@ class EC_Calendar {
 	 *
 	 * @param int $num 			number of events to list
     */
-	function displayEventList($num) {
+	function displayEventList($num, $filter = null) {
 		global $current_user;
 		global $widget_sponsor_message;
 
@@ -129,8 +129,18 @@ class EC_Calendar {
 		$options = get_option('optionsEventsCalendar');
 		$format = $options['dateFormatLarge'];
 		$day_name_length = $options['daynamelength'];
-		$events = $db->getUpcomingEvents($num);
-		
+
+		if (isset($filter) && is_array($filter)) {
+			if (isset($filter['eventEndDate'])) unset($filter['eventEndDate']);
+			if (isset($filter['eventStartDate'])) unset($filter['eventStartDate']);
+			$filter['eventStartDate'] = array('date' => date('Y-m-d'), 'req' => '>=');
+			$filter['eventEndDate'] = array('date' => date('Y-m-d'), 'req' => '>=');
+
+			$events = $db->getFilteredEventList($filter, $num);
+		} else {
+			$events = $db->getUpcomingEvents($num);
+		}
+
 		$output = '<ul id="events-calendar-list">';
 
 		foreach($events as $event) {
