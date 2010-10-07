@@ -330,13 +330,11 @@ class EC_Management {
 	function makeSelectOption ($arrObj, $valueKey, $descKey, $selectedValue = null) {
 		$select = "";
 
-		if (count($this->locationList) > 0) {
-			foreach ($arrObj as $o) {
-				if (isset($selectedValue) && ($o->$valueKey == $selectedValue)) {
-					$select .= "<option value='" . $o->$valueKey . "' selected='selected'>" . $o->$descKey . "</option>\n";
-				} else {
-					$select .= "<option value='" . $o->$valueKey . "'>" . $o->$descKey . "</option>\n";
-				}
+		foreach ($arrObj as $o) {
+			if (isset($selectedValue) && ($o->$valueKey == $selectedValue)) {
+				$select .= "<option value='" . $o->$valueKey . "' selected='selected'>" . $o->$descKey . "</option>\n";
+			} else {
+				$select .= "<option value='" . $o->$valueKey . "'>" . $o->$descKey . "</option>\n";
 			}
 		}
 
