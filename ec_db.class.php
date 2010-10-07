@@ -811,21 +811,21 @@ class EC_DB {
 	 * @param int offset
 	 * @return array
 	 */
-	function getFilteredEventList ($filter, $limit, $offset) {
+	function getFilteredEventList (array $filter, $limit = null, $offset = null) {
 		/*
 		 * filter can contain the following keys:
 		 * locationId => array(id1, id2, ...) or locationId => id1
 		 * categoryId => array(id1, id2, ...) or categoryId => id1
 		 * arrangerId => array(id1, id2, ...) or arrangerId => id1
-		 * eventDateStart => array('date' => 'Y-m-d' format, 'req' => ('<', '<=', '=', '>=' or '>')
-		 * eventDateEnd => array('date' => 'Y-m-d' format, 'req' => ('<', '<=', '=', '>=' or '>')
+		 * eventStartDate => array('date' => 'Y-m-d' format, 'req' => ('<', '<=', '=', '>=' or '>'))
+		 * eventEndDate => array('date' => 'Y-m-d' format, 'req' => ('<', '<=', '=', '>=' or '>'))
 		 */
 		
 		/*
 		 * example
 		 * $filter = array(
 		 *  // We pick all events which end on this specific date (2010-10-19) and further
-		 *  'eventDateEnd' => array('date' => '2010-10-19', 'req' => '>='), 
+		 *  'eventEndDate' => array('date' => '2010-10-19', 'req' => '>='),
 		 *  'locationId' => 1,
 		 *  'categoryId' => array(3,2)
 		 * );
@@ -847,10 +847,10 @@ class EC_DB {
 			$hasFilter = true;
 		}
 		
-		if (isset($filter['locationId'])) {
+		if (!empty($filter['locationId'])) {
 			$e = $filter['locationId'];
 
-			if (is_array($e) && !empty($e)) {
+			if (is_array($e)) {
 				$tmpSql = "";
 				foreach ($e as $v) {
 					$tempSql .= "%d,";
@@ -866,10 +866,10 @@ class EC_DB {
 			unset($e);
 		}
 		
-		if (isset($filter['categoryId'])) {
+		if (!empty($filter['categoryId'])) {
 			$e = $filter['categoryId'];
 
-			if (is_array($e) && !empty($e)) {
+			if (is_array($e)) {
 				$tmpSql = "";
 				foreach ($e as $v) {
 					$tempSql .= "%d,";
@@ -885,10 +885,10 @@ class EC_DB {
 			unset($e);
 		}
 
-		if (isset($filter['arrangerId'])) {
+		if (!empty($filter['arrangerId'])) {
 			$e = $filter['arrangerId'];
 
-			if (is_array($e) && !empty($e)) {
+			if (is_array($e)) {
 				$tmpSql = "";
 				foreach ($e as $v) {
 					$tempSql .= "%d,";
@@ -904,31 +904,43 @@ class EC_DB {
 			unset($e);
 		}
 
-		if (isset($filter['eventDateStart']) && is_array($filter['eventDateStart'])) {
-			$e = $filter['eventDateStart'];
+		if (isset($filter['eventStartDate']) && is_array($filter['eventStartDate'])) {
+			$e = $filter['eventStartDate'];
 
 			if (isset($e['date']) && isset($e['req']) && in_array($e['req'], $legalRequirements)) {
-				$sql .= "(eventDateStart " . $e['req'] . " %s)";
+				if (isset($filter['eventEndDate']) && !isset($e['nogroup']) && !isset($filter['eventEndDate']['nogroup'])) {
+					$sql .= "((eventStartDate " . $e['req'] . " %s) OR ";
+				} else {
+					$sql .= "(eventStartDate " . $e['req'] . " %s) AND ";
+				}
 				$input[] = strval($e['date']);
 			}
 			unset($e);
 		}
 		
-		if (isset($filter['eventDateEnd']) && is_array($filter['eventDateEnd'])) {
-			$e = $filter['eventDateEnd'];
+		if (isset($filter['eventEndDate']) && is_array($filter['eventEndDate'])) {
+			$e = $filter['eventEndDate'];
 
 			if (isset($e['date']) && isset($e['req']) && in_array($e['req'], $legalRequirements)) {
-				$sql .= "(eventDateEnd " . $e['req'] . " %s)";
+				if (isset($filter['eventStartDate']) && !isset($e['nogroup']) && !isset($filter['eventStartDate']['nogroup'])) {
+					$sql .= "(eventEndDate " . $e['req'] . " %s)) AND ";
+				} else {
+					$sql .= "(eventEndDate " . $e['req'] . " %s) AND ";
+				}
 				$input[] = strval($e['date']);
 			}
 			unset($e);
+		}
+		
+		if ($hasFilter) {
+			$sql = substr($sql, 0, -5);
 		}
 		
 		$sql .= " ORDER BY eventStartDate ASC, eventStartTime ASC";
 		
-		if ($limit > 0) {
+		if (isset($limit) && ($limit > 0)) {
 			$sql .= " LIMIT " . intval($limit);
-			if ($offset > 0) {
+			if (isset($offset) && ($offset > 0)) {
 				$sql .= " OFFSET " . intval($offset);
 			}
 		}
@@ -936,6 +948,7 @@ class EC_DB {
 		if ($hasFilter) {
 			$sql = $this->db->prepare($sql, $input);
 		}
+
 		return $this->db->get_results($sql);
 	}
 
